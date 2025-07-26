@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Aozora Utility Tool Config</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline';">
+  <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+  <h1 id="maintitle">Aozora Utility Tool Config</h1>
+  <h4>
+    <div class="operation_area"> 
+      <input type="checkbox" id="language" checked><span id="languagearea">Japanese</span></div>
+  </h4>
+    <div class="operation_area">
+      <button id="top_button"class="button-g button-1 button-wide" value="top" onclick="topPage();">Goto Top</button>
+    </div>
+    <div id="secret" value=""></div>
+  </div>
+  <footer>
+    <p><small>&copy; 2025 Nthree LLC All Rights Reserved. </small></p>
+  </footer>
+
+  <script charset="UTF-8">
+    /// variables
+    let secretWd; // secret
+    let japaneseFlg = false; // japanese flg
+
+    /// constants
+    // japanese
+    const APPNAME_STR_JA = '青空ユーティリティ設定画面';
+    const LANGUAGE_STR_JA = '日本語';
+    const GOTOTOP_STR_JA = 'トップに戻る';
+    // english
+    const APPNAME_STR_EN = 'Aozora Utility Tool Config';
+    const LANGUAGE_STR_EN = 'Japanese';
+    const GOTOTOP_STR_EN = 'Goto Top';
+    // doms
+    const maintitleDom = document.getElementById("maintitle");
+    const languageDom = document.getElementById("language");
+    const languageareaDom = document.getElementById("languagearea");
+    const gotoTopButtonDom = document.getElementById("top_button");
+    const secretDom = document.getElementById("secret");
+
+    /// ipc
+    // watch checkbox
+    languageDom.addEventListener('change', e => {
+        // language detection
+        const fixLang = languageDom.checked ? 'japanese' : 'english';
+        // change language
+        changeLanguage(fixLang);
+        // send to main ipc
+        window.api.send("language", {language: japaneseFlg, secret: secretWd});
+    });
+
+    // be ready
+    window.api.on("ready", arg => {
+        // change dom
+        secretDom.value = arg.secert;
+        // change language
+        changeLanguage(arg.lang);
+    });
+
+    // goto top
+    const topPage = () => {
+      try {
+        console.log("topPage mode");
+        // send to main ipc
+        window.api.send("topapp", secretWd);
+
+      } catch (e) {
+        // error
+        window.api.send("error", e);
+      }
+    }
+    // change language
+    const changeLanguage = lang => {
+        // japanese
+        if(lang == 'japanese') {
+            japaneseFlg = true;
+            document.title = APPNAME_STR_JA;
+            maintitleDom.innerHTML = APPNAME_STR_JA;
+            languageareaDom.innerHTML = LANGUAGE_STR_JA;
+            gotoTopButtonDom.innerHTML = GOTOTOP_STR_JA;
+            document.documentElement.setAttribute("lang", 'ja');
+        // english
+        } else {
+          japaneseFlg = false;
+          document.title = APPNAME_STR_EN;
+          maintitleDom.innerHTML = APPNAME_STR_EN
+          languageareaDom.innerHTML = LANGUAGE_STR_EN;
+          gotoTopButtonDom.innerHTML = GOTOTOP_STR_EN;
+          document.documentElement.setAttribute("lang", 'en');
+        }
+    }
+  </script>
+</body>
+
+</html>
