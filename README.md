@@ -18,7 +18,8 @@ Windows10 ~
 4. Press any buttons.
 - Extract: extract zip to txt. out to "./file/txt/extracted".
 - Modify: modify unnecessary text. out to "./file/txt/modified".
-- Rename: rename filename to formatted style. out to "./file/renamed".
+- Rename: rename filename to formatted style. out to "./file/renamed".  
+
 ※ completed files are in "./file/txt/completed".
 
 ## Features
