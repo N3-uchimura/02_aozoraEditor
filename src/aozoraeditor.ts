@@ -229,6 +229,15 @@ app.on('window-all-closed', () => {
 /*
  IPC
 */
+// ready
+ipcMain.on("beforeready", async (event: any, __) => {
+  logger.info("app: beforeready app");
+  // language
+  const language = cacheMaker.get('language') ?? '';
+  // be ready
+  event.sender.send("ready", language);
+});
+
 // extract
 ipcMain.on('extract', async () => {
   try {
