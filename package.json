@@ -1,7 +1,7 @@
 {
   "name": "net.numthree.aozoraeditor",
   "productName": "aozoraeditor",
-  "version": "1.0.0",
+  "version": "1.0.1-alpha.1",
   "description": "Electron application aozoraeditor",
   "main": "build/aozoraeditor.js",
   "scripts": {

@@ -20,7 +20,7 @@ Windows10 ~
 - Modify: modify unnecessary text. out to "./file/txt/modified".
 - Rename: rename filename to formatted style. out to "./file/renamed".  
 
-※ completed files are in "./file/txt/completed".
+※ backup files are in "./file/txt/completed".
 
 ## Features
 + You can change default language to English by pressing "Config" button and check off "japanese".
