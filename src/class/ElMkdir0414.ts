@@ -9,7 +9,7 @@
 'use strict';
 
 // define modules
-import { promises, existsSync } from 'fs'; // file system
+import { promises, existsSync } from 'node:fs'; // file system
 // file system definition
 const { mkdir } = promises;
 

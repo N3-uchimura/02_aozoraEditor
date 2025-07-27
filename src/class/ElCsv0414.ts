@@ -9,12 +9,12 @@
 'use strict';
 
 // define modules
-import { dialog } from 'electron'; // electron
 import { readFile, writeFile } from 'node:fs/promises'; // file system
+import { dialog } from 'electron'; // electron
+import { FileFilter } from 'electron/main'; // file filter
 import { parse } from 'csv-parse/sync'; // csv parser
 import { stringify } from 'csv-stringify/sync'; // csv stringify
 import iconv from 'iconv-lite'; // encoding
-import { FileFilter } from 'electron/main'; // file filter
 
 // csv dialog option
 interface csvDialog {

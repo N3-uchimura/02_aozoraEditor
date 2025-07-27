@@ -28,19 +28,6 @@ export class Modifiy {
     Modifiy.logger.debug('modify: constructed');
   }
 
-  // initialize
-  init(): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      try {
-
-      } catch (e: unknown) {
-        Modifiy.logger.error(e);
-        // reject
-        reject();
-      }
-    });
-  }
-
   // remove annotation
   removeAnnotation(str: string): Promise<removed | string> {
     return new Promise(async (resolve, reject) => {
@@ -57,6 +44,8 @@ export class Modifiy {
             header: result[0],
             body: str.split(annotation)[2],
           });
+        } else {
+          resolve('error');
         }
 
       } catch (e: unknown) {
@@ -79,6 +68,8 @@ export class Modifiy {
           const result: string[] = str.split(annotation);
           // result
           resolve(result[0]);
+        } else {
+          resolve('error');
         }
 
       } catch (e: unknown) {
