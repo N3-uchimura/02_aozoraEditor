@@ -1,8 +1,8 @@
 {
-  "name": "net.numthree.aozoraeditor",
-  "productName": "aozoraeditor",
+  "name": "aozora-editor",
+  "productName": "aozora-editor",
   "version": "1.0.1-alpha.1",
-  "description": "Electron application aozoraeditor",
+  "description": "application for aozoraeditor",
   "main": "build/aozoraeditor.js",
   "scripts": {
     "build": "tsc && chcp 65001",
