@@ -20,7 +20,7 @@ import iconv from 'iconv-lite'; // Text converter
 import extract from 'extract-zip'; // extract zip file
 import Encoding from 'encoding-japanese'; // for encoding
 import NodeCache from "node-cache"; // node-cache
-import { Modifiy } from './class/ElTextModifiy0518'; // modifier
+import { Modifiy } from './class/ElTextModifiy0813'; // modifier
 import ELLogger from './class/ElLogger'; // logger
 import Dialog from './class/ElDialog0721'; // dialog
 import MKDir from './class/ElMkdir0414'; // mdkir
@@ -429,10 +429,17 @@ ipcMain.on('modify', async () => {
               logger.error('error5');
             }
             logger.debug('5: finished');
+
+            // exchange old to new
+            const removedStr6: string = await modifyMaker.exchangeOld(removedStr5);
+            if (removedStr6 == 'error') {
+              logger.error('error6');
+            }
+            logger.debug('6: finished');
             // filepath output
             const outPath: string = path.join(globalRootPath, 'file/txt', 'modified', fl);
             // write out to file
-            await writeFile(outPath, removedStr1.header + removedStr5);
+            await writeFile(outPath, removedStr1.header + removedStr6);
             // filepath completed
             const fileCompPath: string = path.join(globalRootPath, 'file/txt', 'completed', fl);
             // not exists

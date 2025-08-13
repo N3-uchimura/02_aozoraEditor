@@ -3,10 +3,14 @@
  *
  * ElTextModifiy
  * function：text modifier
- * updated: 2025/05/18
+ * updated: 2025/08/13
  **/
 
 'use strict';
+
+/// Constants
+// namespace
+import { myOldtoNew } from '../consts/globalvariables';
 
 // define modules
 import { toDakuon } from 'kanadaku';
@@ -30,6 +34,7 @@ export class Modifiy {
 
   // remove annotation
   removeAnnotation(str: string): Promise<removed | string> {
+    Modifiy.logger.silly('remove annotation');
     return new Promise(async (resolve, reject) => {
       try {
         // annotation distinction
@@ -58,6 +63,7 @@ export class Modifiy {
 
   // remove footer annotation
   removeFooter(str: string): Promise<string> {
+    Modifiy.logger.silly('remove footer annotation');
     return new Promise(async (resolve, reject) => {
       try {
         // distinction
@@ -80,8 +86,9 @@ export class Modifiy {
     });
   }
 
-  // emove ruby(《》)
+  // remove ruby(《》)
   removeRuby(str: string): Promise<string> {
+    Modifiy.logger.silly('remove ruby(《》)');
     return new Promise(async (resolve, reject) => {
       try {
         // result
@@ -114,6 +121,7 @@ export class Modifiy {
   repeatCharacter(str: string): Promise<string> {
     return new Promise(async (resolve1, reject1) => {
       try {
+        Modifiy.logger.silly('remove repeat signs');
         // tmp
         let tmpStr: string = str;
         // remove repeat signs
@@ -258,6 +266,32 @@ export class Modifiy {
         Modifiy.logger.error(e);
         // reject
         reject1('error');
+      }
+    });
+  }
+
+  // exchange old to new
+  exchangeOld(str: string): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        Modifiy.logger.silly('exchange old to new');
+        // tmp string
+        let tmpStr: string = '';
+        tmpStr = str;
+        // for loop
+        for (const [key, value] of Object.entries(myOldtoNew.OLDNEW)) {
+          // remove footer
+          if (tmpStr.includes(key)) {
+            Modifiy.logger.silly(`echanged ${key} to ${value}`);
+            tmpStr = tmpStr.replaceAll(key, value);
+          }
+        }
+        resolve(tmpStr);
+
+      } catch (e: unknown) {
+        Modifiy.logger.error(e);
+        // reject
+        reject('error');
       }
     });
   }
