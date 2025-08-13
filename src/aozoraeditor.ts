@@ -165,9 +165,7 @@ app.on('ready', async () => {
     // make file dir
     await mkdirManager.mkDir('file');
     // make dir
-    await mkdirManager.mkDirAll(['file/txt', 'file/source', 'file/tmp', 'file/renamed']);
-    // make dir
-    await mkdirManager.mkDirAll(['file/txt/modified', 'file/txt/extracted', 'file/txt/completed']);
+    await mkdirManager.mkDirAll(['file/source', 'file/tmp', 'file/renamed', 'file/modified', 'file/extracted']);
     // icons
     const icon: Electron.NativeImage = nativeImage.createFromPath(path.join(globalRootPath, 'assets', 'aozora.ico'));
     // tray
@@ -310,7 +308,7 @@ ipcMain.on('extract', async () => {
           // when txt
           if (extension == '.txt') {
             // output path
-            const outPath: string = path.join(globalRootPath, 'file/txt/extracted', filename);
+            const outPath: string = path.join(globalRootPath, 'file/extracted', filename);
             // not exists
             if (!existsSync(outPath)) {
               // copy
@@ -346,14 +344,14 @@ ipcMain.on('modify', async () => {
     // language
     const language = cacheMaker.get('language') ?? 'japanese';
     // file list
-    const files: string[] = await readdir('file/txt/extracted');
+    const files: string[] = await readdir('file/extracted');
     // if empty
     if (files.length == 0) {
       // japanese
       if (language == 'japanese') {
-        throw new Error('対象のファイルが空です（file/txt/extracted');
+        throw new Error('対象のファイルが空です（file/extracted');
       } else {
-        throw new Error('file/txt directory is empty');
+        throw new Error('file/extracted directory is empty');
       }
     }
     logger.debug('modify: txt exists');
@@ -364,7 +362,7 @@ ipcMain.on('modify', async () => {
         try {
           let finalStr: any;
           // filepath
-          const filePath: string = path.join(globalRootPath, 'file/txt', 'extracted', fl);
+          const filePath: string = path.join(globalRootPath, 'file', 'extracted', fl);
 
           // not exists
           if (existsSync(filePath)) {
@@ -437,16 +435,9 @@ ipcMain.on('modify', async () => {
             }
             logger.debug('6: finished');
             // filepath output
-            const outPath: string = path.join(globalRootPath, 'file/txt', 'modified', fl);
+            const outPath: string = path.join(globalRootPath, 'file', 'modified', fl);
             // write out to file
             await writeFile(outPath, removedStr1.header + removedStr6);
-            // filepath completed
-            const fileCompPath: string = path.join(globalRootPath, 'file/txt', 'completed', fl);
-            // not exists
-            if (!existsSync(fileCompPath)) {
-              // move to complete dir
-              await rename(filePath, fileCompPath);
-            }
           }
           logger.info('writing finished.');
           resolve();
@@ -479,14 +470,14 @@ ipcMain.on('rename', async () => {
     // language
     const language = cacheMaker.get('language') ?? 'japanese';
     // file list
-    const files: string[] = await readdir('file/txt/modified');
+    const files: string[] = await readdir('file/modified');
     // if empty
     if (files.length == 0) {
       // japanese
       if (language == 'japanese') {
-        throw new Error('対象が空です（file/txt/modified');
+        throw new Error('対象が空です（file/modified');
       } else {
-        throw new Error('file/txt directory is empty');
+        throw new Error('file/modified directory is empty');
       }
     }
     // promise
@@ -496,7 +487,7 @@ ipcMain.on('rename', async () => {
           // file name
           let newFileName: string = '';
           // file path
-          const filePath: string = path.join(globalRootPath, 'file/txt/modified', fl);
+          const filePath: string = path.join(globalRootPath, 'file/modified', fl);
           // renamed path
           const renamePath: string = path.join(globalRootPath, 'file/renamed');
           // file reading

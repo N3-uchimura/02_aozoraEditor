@@ -18,14 +18,12 @@ Windows10 ~
    npm install
    npm start
    ```
-3. put zip files into "./file/source".
+3. put zip files into ./file/source.
 4. Press any buttons.
 
-- Extract: extract zip to txt. out to "./file/txt/extracted".
-- Modify: modify unnecessary text and old kana to new one. out to "./file/txt/modified".
-- Rename: rename filename to formatted style. out to "./file/renamed".
-
-※ backup files are in "./file/txt/completed".
+- Extract: extract zip to txt. out from ./file/source to ./file/extracted.
+- Modify: modify unnecessary text and old kana to new one. from ./file/extracted out to ./file/modified.
+- Rename: rename filename to formatted style. out from ./file/modified to "./file/renamed".
 
 ## Features
 
