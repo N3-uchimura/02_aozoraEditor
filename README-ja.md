@@ -1,3 +1,12 @@
+<table>
+	<thead>
+    	<tr>
+      		<th style="text-align:center"><a href="README.md">English</a></th>
+      		<th style="text-align:center">日本語</th>
+    	</tr>
+  	</thead>
+</table>
+
 ## name
 
 青空エディタ
