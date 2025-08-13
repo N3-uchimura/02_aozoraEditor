@@ -264,7 +264,7 @@ ipcMain.on('extract', async () => {
       return new Promise(async (resolve, _) => {
         try {
           // txt file path
-          const targetPath: string = path.join(globalRootPath, path.join(baseFilePath, 'tmp'), fl);
+          const targetPath: string = path.join(baseFilePath, 'tmp', fl);
           await unlink(targetPath);
           // result
           resolve();
@@ -282,9 +282,9 @@ ipcMain.on('extract', async () => {
       return new Promise(async (resolve, _) => {
         try {
           // zip file path
-          const zipPath: string = path.join(globalRootPath, path.join(baseFilePath, 'source'), fl);
+          const zipPath: string = path.join(baseFilePath, 'source', fl);
           // txt file path
-          const targetPath: string = path.join(globalRootPath, path.join(baseFilePath, 'tmp'));
+          const targetPath: string = path.join(baseFilePath, 'tmp');
           await extract(zipPath, { dir: targetPath });
           resolve();
 
