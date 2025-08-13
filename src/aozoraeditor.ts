@@ -63,6 +63,8 @@ if (!myConst.DEVMODE) {
 } else {
   globalRootPath = path.join(__dirname, '..');
 }
+// make file dir
+const baseFilePath: string = path.join(globalRootPath, 'file');
 
 // create main window
 const createWindow = (): void => {
@@ -162,10 +164,10 @@ app.on('ready', async () => {
     }
     // cache
     cacheMaker.set('language', language);
-    // make file dir
-    await mkdirManager.mkDir('file');
+
     // make dir
-    await mkdirManager.mkDirAll(['file/source', 'file/tmp', 'file/renamed', 'file/modified', 'file/extracted']);
+    await mkdirManager.mkDir(baseFilePath);
+    await mkdirManager.mkDirAll([path.join(baseFilePath, 'source'), path.join(baseFilePath, 'tmp'), path.join(baseFilePath, 'renamed'), path.join(baseFilePath, 'modified'), path.join(baseFilePath, 'extracted')]);
     // icons
     const icon: Electron.NativeImage = nativeImage.createFromPath(path.join(globalRootPath, 'assets', 'aozora.ico'));
     // tray
@@ -243,7 +245,7 @@ ipcMain.on('extract', async () => {
     // language
     const language = cacheMaker.get('language') ?? 'japanese';
     // zip file list
-    const zipFiles: string[] = await readdir('file/source/');
+    const zipFiles: string[] = await readdir(path.join(baseFilePath, 'source'));
     // if empty
     if (zipFiles.length == 0) {
       // japanese
@@ -256,13 +258,13 @@ ipcMain.on('extract', async () => {
     logger.debug('extract: zip exists');
 
     // txtfile list
-    const tmpTxtFiles: string[] = await readdir('file/tmp/');
+    const tmpTxtFiles: string[] = await readdir(path.join(baseFilePath, 'tmp'));
     // delete all files
     await Promise.all(tmpTxtFiles.map((fl: string): Promise<void> => {
       return new Promise(async (resolve, _) => {
         try {
           // txt file path
-          const targetPath: string = path.join(globalRootPath, 'file/tmp', fl);
+          const targetPath: string = path.join(globalRootPath, path.join(baseFilePath, 'tmp'), fl);
           await unlink(targetPath);
           // result
           resolve();
@@ -280,9 +282,9 @@ ipcMain.on('extract', async () => {
       return new Promise(async (resolve, _) => {
         try {
           // zip file path
-          const zipPath: string = path.join(globalRootPath, 'file/source', fl);
+          const zipPath: string = path.join(globalRootPath, path.join(baseFilePath, 'source'), fl);
           // txt file path
-          const targetPath: string = path.join(globalRootPath, 'file/tmp');
+          const targetPath: string = path.join(globalRootPath, path.join(baseFilePath, 'tmp'));
           await extract(zipPath, { dir: targetPath });
           resolve();
 
@@ -294,13 +296,13 @@ ipcMain.on('extract', async () => {
     logger.debug('extract: all zip extracted');
 
     // txtfile list
-    const txtFiles: string[] = await readdir('file/tmp/');
+    const txtFiles: string[] = await readdir(path.join(baseFilePath, 'tmp'));
     // loop file
     await Promise.all(txtFiles.map((fl: string): Promise<void> => {
       return new Promise(async (resolve, _) => {
         try {
           // file path
-          const filePath: string = path.join(globalRootPath, 'file/tmp', fl);
+          const filePath: string = path.join(baseFilePath, 'tmp', fl);
           // file name
           const filename: string = path.basename(filePath)
           // extension
@@ -308,7 +310,7 @@ ipcMain.on('extract', async () => {
           // when txt
           if (extension == '.txt') {
             // output path
-            const outPath: string = path.join(globalRootPath, 'file/extracted', filename);
+            const outPath: string = path.join(baseFilePath, 'extracted', filename);
             // not exists
             if (!existsSync(outPath)) {
               // copy
@@ -344,7 +346,7 @@ ipcMain.on('modify', async () => {
     // language
     const language = cacheMaker.get('language') ?? 'japanese';
     // file list
-    const files: string[] = await readdir('file/extracted');
+    const files: string[] = await readdir(path.join(baseFilePath, 'extracted'));
     // if empty
     if (files.length == 0) {
       // japanese
@@ -362,7 +364,7 @@ ipcMain.on('modify', async () => {
         try {
           let finalStr: any;
           // filepath
-          const filePath: string = path.join(globalRootPath, 'file', 'extracted', fl);
+          const filePath: string = path.join(baseFilePath, 'extracted', fl);
 
           // not exists
           if (existsSync(filePath)) {
@@ -435,7 +437,7 @@ ipcMain.on('modify', async () => {
             }
             logger.debug('6: finished');
             // filepath output
-            const outPath: string = path.join(globalRootPath, 'file', 'modified', fl);
+            const outPath: string = path.join(baseFilePath, 'modified', fl);
             // write out to file
             await writeFile(outPath, removedStr1.header + removedStr6);
           }
@@ -470,7 +472,7 @@ ipcMain.on('rename', async () => {
     // language
     const language = cacheMaker.get('language') ?? 'japanese';
     // file list
-    const files: string[] = await readdir('file/modified');
+    const files: string[] = await readdir(path.join(baseFilePath, 'modified'));
     // if empty
     if (files.length == 0) {
       // japanese
@@ -487,9 +489,9 @@ ipcMain.on('rename', async () => {
           // file name
           let newFileName: string = '';
           // file path
-          const filePath: string = path.join(globalRootPath, 'file/modified', fl);
+          const filePath: string = path.join(baseFilePath, 'modified', fl);
           // renamed path
-          const renamePath: string = path.join(globalRootPath, 'file/renamed');
+          const renamePath: string = path.join(baseFilePath, 'renamed');
           // file reading
           const txtdata: Buffer = await readFile(filePath);
           // char encode
@@ -676,7 +678,3 @@ ipcMain.on('exit', async () => {
     logger.error(e);
   }
 });
-
-/*
- Functions
-*/
