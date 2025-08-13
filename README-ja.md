@@ -4,7 +4,7 @@
 
 ## Overview
 
-[aozoraScraper]: https://github.com/N3-uchimura/02_aozoraScraper
+[aozoraScraper](https://github.com/N3-uchimura/02_aozoraScraper, "青空スクレイパー")
 
 により取得した zip ファイルから txt ファイルを抽出し、整形及びリネームします。
 
@@ -16,7 +16,6 @@ Windows10 ~
 
 1. リリースから ZIP ファイルをダウンロードするか、リポジトリを pull します。
 2. コマンドプロンプトを開き、解凍したフォルダか git フォルダ内に移動します。
-   （例）
    ```
    cd C:\home
    ```
