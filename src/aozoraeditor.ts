@@ -250,9 +250,9 @@ ipcMain.on('extract', async () => {
     if (zipFiles.length == 0) {
       // japanese
       if (language == 'japanese') {
-        throw new Error('対象のzipファイルが空です（file/source）。');
+        throw new Error('対象のzipファイルが空です(file/source)。');
       } else {
-        throw new Error('file/source directory is empty');
+        throw new Error('file/source directory is empty.');
       }
     }
     logger.debug('extract: zip exists');
@@ -351,9 +351,9 @@ ipcMain.on('modify', async () => {
     if (files.length == 0) {
       // japanese
       if (language == 'japanese') {
-        throw new Error('対象のファイルが空です（file/extracted');
+        throw new Error('対象のファイルが空です(file/extracted)。');
       } else {
-        throw new Error('file/extracted directory is empty');
+        throw new Error('file/extracted directory is empty.');
       }
     }
     logger.debug('modify: txt exists');
@@ -477,9 +477,9 @@ ipcMain.on('rename', async () => {
     if (files.length == 0) {
       // japanese
       if (language == 'japanese') {
-        throw new Error('対象が空です（file/modified');
+        throw new Error('対象が空です(file/modified)。');
       } else {
-        throw new Error('file/modified directory is empty');
+        throw new Error('file/modified directory is empty.');
       }
     }
     // promise
@@ -488,8 +488,10 @@ ipcMain.on('rename', async () => {
         try {
           // file name
           let newFileName: string = '';
+          // renamed path
+          const rootFilePath: string = path.join(baseFilePath, 'modified');
           // file path
-          const filePath: string = path.join(baseFilePath, 'modified', fl);
+          const filePath: string = path.join(rootFilePath, fl);
           // renamed path
           const renamePath: string = path.join(baseFilePath, 'renamed');
           // file reading
@@ -519,11 +521,11 @@ ipcMain.on('rename', async () => {
 
           if (!authorStr) {
             // filename
-            newFileName = path.join(renamePath, `${paddedIndex}_${titleStr}_${subTitleStr}.txt`);
+            newFileName = `${paddedIndex}_${titleStr}_${subTitleStr}.txt`;
 
           } else {
             // filename
-            newFileName = path.join(renamePath, `${paddedIndex}_${titleStr}_${subTitleStr}_${authorStr}.txt`);
+            newFileName = `${paddedIndex}_${titleStr}_${subTitleStr}_${authorStr}.txt`;
           }
 
           // prohibit symbol
@@ -537,7 +539,7 @@ ipcMain.on('rename', async () => {
             return new Promise(async (resolve2, _) => {
               try {
                 // tmp
-                tmpStr = newFileName;
+                tmpStr = path.join(renamePath, newFileName);
 
                 // include symbol
                 if (newFileName.includes(symb)) {
@@ -553,6 +555,10 @@ ipcMain.on('rename', async () => {
           }));
 
           if (tmpStr.length < 255) {
+            // backup file
+            const backupPath: string = path.join(rootFilePath, `bk_${fl}`);
+            // copy
+            await copyFile(filePath, backupPath);
             // rename
             await rename(filePath, tmpStr);
             // wait for 1sec
