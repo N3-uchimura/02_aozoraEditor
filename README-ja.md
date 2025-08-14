@@ -21,7 +21,9 @@
 
 Windows10 ~
 
-## Usage
+## Setting
+
+# From souce
 
 1. リリースから ZIP ファイルをダウンロードするか、リポジトリを pull します。
 2. コマンドプロンプトを開き、解凍したフォルダか git フォルダ内に移動します。
@@ -33,8 +35,16 @@ Windows10 ~
    npm install
    npm start
    ```
-4. ダウンロードした ZIP ファイルを、「./file/source」に入れます。
-5. 以下のボタンを上から順番に押していきます。
+
+# From exe
+
+1. リリースから EXE ファイルをダウンロードします。
+2. ダウンロードした EXE ファイルを実行し、インストールします。
+
+## Usage
+
+1. ダウンロードした ZIP ファイルを、「./file/source」に入れます。
+2. 以下のボタンを上から順番に押していきます。
 
 - ZIP 解凍:「./file/source」内の ZIP ファイルを解凍し、解凍した TXT ファイルを「./file/extracted」内に保存します。
 - TXT 修正: 「./file/extracted」内の TXT ファイルそれぞれに対し、不要なテキストを除去し、旧（歴史的）仮名遣いを新仮名遣いに置換して「./file/modified」に保存します。

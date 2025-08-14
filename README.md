@@ -19,7 +19,9 @@ This is editor for aozora scraped files.
 
 Windows10 ~
 
-## Usage
+## Setting
+
+# From souce
 
 1. Download zip or pull repository.
 2. Execute below on cmd.
@@ -27,8 +29,16 @@ Windows10 ~
    npm install
    npm start
    ```
-3. put zip files into ./file/source.
-4. Press any buttons.
+
+# From exe
+
+1. Download exe file from release.
+2. DoubleClick on exe file and install.
+
+## Usage
+
+1. put zip files into ./file/source.
+2. Press any buttons.
 
 - Extract: extract zip to txt. out from ./file/source to ./file/extracted.
 - Modify: modify unnecessary text and old kana to new one. from ./file/extracted out to ./file/modified.
