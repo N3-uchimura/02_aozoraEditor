@@ -21,7 +21,7 @@ Windows10 ~
 
 ## Setting
 
-# From souce
+### From souce
 
 1. Download zip or pull repository.
 2. Execute below on cmd.
@@ -30,7 +30,7 @@ Windows10 ~
    npm start
    ```
 
-# From exe
+### From exe
 
 1. Download exe file from release.
 2. DoubleClick on exe file and install.
