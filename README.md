@@ -41,7 +41,7 @@ Windows10 ~
 2. Press any buttons.
 
 - Extract: extract zip to txt. out from ./file/source to ./file/extracted.
-- Modify: modify unnecessary text and old kana/character to new one. from ./file/extracted out to ./file/modified.
+- Modify: modify unnecessary text and old character to new one. from ./file/extracted out to ./file/modified.
 - Rename: rename filename to formatted style. out from ./file/modified to "./file/renamed".
 
 ## Features
