@@ -3,17 +3,17 @@
  *
  * ElTextModifiy
  * function：text modifier
- * updated: 2025/08/13
+ * updated: 2025/08/24
  **/
 
 'use strict';
 
-/// Constants
-// namespace
-import { myOldtoNew } from '../consts/globalvariables';
-
 // define modules
 import { toDakuon } from 'kanadaku';
+import { jionArray } from '../lib/dic-jion';
+import { kanaArray } from '../lib/dic-kana';
+import { kanjiArray } from '../lib/dic-kanji';
+import { smallArray } from '../lib/dic-small';
 
 //* Interfaces
 interface removed {
@@ -34,9 +34,9 @@ export class Modifiy {
 
   // remove annotation
   removeAnnotation(str: string): Promise<removed | string> {
-    Modifiy.logger.silly('remove annotation');
     return new Promise(async (resolve, reject) => {
       try {
+        Modifiy.logger.silly('modify: remove annotation');
         // annotation distinction
         const annotation: string = '-------------------------------------------------------';
 
@@ -63,9 +63,9 @@ export class Modifiy {
 
   // remove footer annotation
   removeFooter(str: string): Promise<string> {
-    Modifiy.logger.silly('remove footer annotation');
     return new Promise(async (resolve, reject) => {
       try {
+        Modifiy.logger.silly('modify: remove footer annotation');
         // distinction
         const annotation: string = '底本：';
         // remove footer
@@ -88,9 +88,9 @@ export class Modifiy {
 
   // remove ruby(《》)
   removeRuby(str: string): Promise<string> {
-    Modifiy.logger.silly('remove ruby(《》)');
     return new Promise(async (resolve, reject) => {
       try {
+        Modifiy.logger.silly('modify: remove ruby(《》)');
         // result
         resolve(str.replace(/《.+?》/g, ''));
 
@@ -106,6 +106,7 @@ export class Modifiy {
   removeBrackets(str: string): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
+        Modifiy.logger.silly('modify: remove brackets');
         // result
         resolve(str.replace(/《.+?》/g, ''));
 
@@ -235,6 +236,7 @@ export class Modifiy {
   removeSymbols(str: string): Promise<string> {
     return new Promise(async (resolve1, reject1) => {
       try {
+        Modifiy.logger.silly('modify: remove symbols');
         // tmp
         let tmpStr: string = str;
         // symbols
@@ -270,22 +272,66 @@ export class Modifiy {
     });
   }
 
-  // exchange old to new
-  exchangeOld(str: string): Promise<string> {
+  // replace old to new
+  replaceOldToNew(str: string, mode: number): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
-        Modifiy.logger.silly('exchange old to new');
+        Modifiy.logger.silly('modify: exchange old to new');
+        // reverse
+        let reverseFlg: boolean;
+        // comparison table
+        let comparisonArray: any[];
         // tmp string
         let tmpStr: string = '';
+        // tmp input
         tmpStr = str;
-        // for loop
-        for (const [key, value] of Object.entries(myOldtoNew.OLDNEW)) {
-          // remove footer
-          if (tmpStr.includes(key)) {
-            Modifiy.logger.silly(`echanged ${key} to ${value}`);
-            tmpStr = tmpStr.replaceAll(key, value);
+
+        // switch on mode
+        switch (mode) {
+          case 1:
+            Modifiy.logger.silly("replaceOldToNew: kanji mode.");
+            comparisonArray = kanjiArray;
+            reverseFlg = false;
+            break;
+          case 2:
+            Modifiy.logger.silly("replaceOldToNew: kana mode.");
+            comparisonArray = kanaArray;
+            reverseFlg = false;
+            break;
+          case 3:
+            Modifiy.logger.silly("replaceOldToNew: small mode.");
+            comparisonArray = smallArray;
+            reverseFlg = true;
+            break;
+          case 4:
+            Modifiy.logger.silly("replaceOldToNew: jion mode.");
+            comparisonArray = jionArray;
+            reverseFlg = true;
+            break;
+          default:
+            Modifiy.logger.silly(`Sorry, we are out of ${mode}.`);
+            comparisonArray = [];
+            reverseFlg = false;
+        }
+
+        if (comparisonArray.length > 0) {
+          for (let i = 0; i < comparisonArray.length; i++) {
+            if (reverseFlg) {
+              // remove footer
+              if (tmpStr.includes(comparisonArray[i][0])) {
+                tmpStr = tmpStr.replaceAll(comparisonArray[i][0], comparisonArray[i][1]);
+                Modifiy.logger.silly(`replaced ${comparisonArray[i][0]} to ${comparisonArray[i][1]}`);
+              }
+            } else {
+              // remove footer
+              if (tmpStr.includes(comparisonArray[i][1])) {
+                tmpStr = tmpStr.replaceAll(comparisonArray[i][1], comparisonArray[i][0]);
+                Modifiy.logger.silly(`replaced ${comparisonArray[i][1]} to ${comparisonArray[i][0]}`);
+              }
+            }
           }
         }
+        // finished
         resolve(tmpStr);
 
       } catch (e: unknown) {

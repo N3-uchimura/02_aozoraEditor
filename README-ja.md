@@ -47,7 +47,7 @@ Windows10 ~
 2. 以下のボタンを上から順番に押していきます。
 
 - ZIP 解凍:「./file/source」内の ZIP ファイルを解凍し、解凍した TXT ファイルを「./file/extracted」内に保存します。
-- TXT 修正: 「./file/extracted」内の TXT ファイルそれぞれに対し、不要なテキストを除去し、旧字体を新字体に置換して「./file/modified」に保存します。
+- TXT 修正: 「./file/extracted」内の TXT ファイルそれぞれに対し、不要なテキストを除去し、旧字体/旧かなを新字体/新かなに置換して「./file/modified」に保存します。
 - リネーム: 「./file/modified」内の TXT ファイル名を「ID*作品名*作者名.txt」に変換し、「./file/renamed"」内に保存します。
 
 ## Features
@@ -57,6 +57,10 @@ Windows10 ~
 ## Author
 
 N3-Uchimura
+
+## Reference
+
+[kkh](https://github.com/okikae/kkh/)
 
 ## Licence
 

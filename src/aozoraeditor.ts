@@ -20,7 +20,7 @@ import iconv from 'iconv-lite'; // Text converter
 import extract from 'extract-zip'; // extract zip file
 import Encoding from 'encoding-japanese'; // for encoding
 import NodeCache from "node-cache"; // node-cache
-import { Modifiy } from './class/ElTextModifiy0813'; // modifier
+import { Modifiy } from './class/ElTextModifiy0824'; // modifier
 import ELLogger from './class/ElLogger'; // logger
 import Dialog from './class/ElDialog0721'; // dialog
 import MKDir from './class/ElMkdir0414'; // mdkir
@@ -430,16 +430,26 @@ ipcMain.on('modify', async () => {
             }
             logger.debug('5: finished');
 
-            // exchange old to new
-            const removedStr6: string = await modifyMaker.exchangeOld(removedStr5);
+            // exchange kanji
+            const removedStr6: string = await modifyMaker.replaceOldToNew(removedStr5, 1);
             if (removedStr6 == 'error') {
               logger.error('error6');
             }
             logger.debug('6: finished');
+            // exchange kana
+            const removedStr7: string = await modifyMaker.replaceOldToNew(removedStr6, 2);
+            if (removedStr7 == 'error') {
+              logger.error('error7');
+            }
+            // exchange small
+            const removedStr8: string = await modifyMaker.replaceOldToNew(removedStr7, 3);
+            if (removedStr8 == 'error') {
+              logger.error('error8');
+            }
             // filepath output
             const outPath: string = path.join(baseFilePath, 'modified', fl);
             // write out to file
-            await writeFile(outPath, removedStr1.header + removedStr6);
+            await writeFile(outPath, removedStr1.header + removedStr8);
           }
           logger.info('writing finished.');
           resolve();
