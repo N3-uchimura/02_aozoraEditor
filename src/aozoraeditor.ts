@@ -32,7 +32,7 @@ const logger: ELLogger = new ELLogger(myConst.COMPANY_NAME, myConst.APP_NAME, LO
 // dialog instance
 const dialogMaker: Dialog = new Dialog(logger);
 // mkdir instance
-const mkdirManager = new MKDir(logger);
+const mkdirManager: any = new MKDir(logger);
 // modify instance
 const modifyMaker: Modifiy = new Modifiy(logger);
 // cache instance
@@ -95,7 +95,7 @@ const createWindow = (): void => {
     });
 
     // stay at tray
-    mainWindow.on('minimize', (event: any): void => {
+    mainWindow.on('will-resize', (event: any): void => {
       // avoid Wclick
       event.preventDefault();
       // hide window
@@ -130,7 +130,7 @@ const createWindow = (): void => {
 app.enableSandbox();
 
 // main app
-app.on('ready', async () => {
+app.on('ready', async (): Promise<void> => {
   try {
     logger.info('app: electron is ready');
     // create window
@@ -148,7 +148,7 @@ app.on('ready', async () => {
       await writeFile(languageTxtPath, 'japanese');
     }
     // get language
-    const language = await readFile(languageTxtPath, 'utf8');
+    const language: string = await readFile(languageTxtPath, 'utf8');
     logger.debug(`language is ${language}`);
     // japanese
     if (language == 'japanese') {
@@ -205,7 +205,7 @@ app.on('ready', async () => {
 });
 
 // activate
-app.on('activate', () => {
+app.on('activate', (): void => {
   // no window
   if (BrowserWindow.getAllWindows().length === 0) {
     // reload
@@ -214,13 +214,13 @@ app.on('activate', () => {
 });
 
 // close
-app.on('before-quit', () => {
+app.on('before-quit', (): void => {
   // turn on close flg
   isQuiting = true;
 });
 
 // end
-app.on('window-all-closed', () => {
+app.on('window-all-closed', (): void => {
   logger.info('app: close app');
   // exit
   app.quit();
@@ -230,20 +230,20 @@ app.on('window-all-closed', () => {
  IPC
 */
 // ready
-ipcMain.on("beforeready", async (event: any, __) => {
+ipcMain.on("beforeready", async (event: any, __): Promise<void> => {
   logger.info("app: beforeready app");
   // language
-  const language = cacheMaker.get('language') ?? '';
+  const language: string = cacheMaker.get('language') ?? '';
   // be ready
   event.sender.send("ready", language);
 });
 
 // extract
-ipcMain.on('extract', async () => {
+ipcMain.on('extract', async (): Promise<void> => {
   try {
     logger.info('ipc: extract mode');
     // language
-    const language = cacheMaker.get('language') ?? 'japanese';
+    const language: string = cacheMaker.get('language') ?? 'japanese';
     // zip file list
     const zipFiles: string[] = await readdir(path.join(baseFilePath, 'source'));
     // if empty
@@ -340,11 +340,11 @@ ipcMain.on('extract', async () => {
 });
 
 // modify
-ipcMain.on('modify', async () => {
+ipcMain.on('modify', async (): Promise<void> => {
   try {
     logger.info('ipc: modify mode');
     // language
-    const language = cacheMaker.get('language') ?? 'japanese';
+    const language: any = cacheMaker.get('language') ?? 'japanese';
     // file list
     const files: string[] = await readdir(path.join(baseFilePath, 'extracted'));
     // if empty
@@ -369,7 +369,7 @@ ipcMain.on('modify', async () => {
           // not exists
           if (existsSync(filePath)) {
             // read files
-            const txtdata = await readFile(filePath);
+            const txtdata: any = await readFile(filePath);
             // detect charcode
             const detectedEncoding: string | boolean = Encoding.detect(txtdata);
             logger.debug('charcode: ' + detectedEncoding);
@@ -383,7 +383,7 @@ ipcMain.on('modify', async () => {
               }
             }
             // decode
-            const str = iconv.decode(txtdata, detectedEncoding);
+            const str: string = iconv.decode(txtdata, detectedEncoding);
             logger.debug('char decoding finished.');
             // repeat strings
             const removedStr0: string = await modifyMaker.repeatCharacter(str);
@@ -476,11 +476,11 @@ ipcMain.on('modify', async () => {
 });
 
 // rename
-ipcMain.on('rename', async () => {
+ipcMain.on('rename', async (): Promise<void> => {
   try {
     logger.info('ipc: rename mode');
     // language
-    const language = cacheMaker.get('language') ?? 'japanese';
+    const language: string = cacheMaker.get('language') ?? 'japanese';
     // file list
     const files: string[] = await readdir(path.join(baseFilePath, 'modified'));
     // if empty
@@ -599,11 +599,11 @@ ipcMain.on('rename', async () => {
 });
 
 // config
-ipcMain.on('config', async (event: any, _) => {
+ipcMain.on('config', async (event: any, _): Promise<void> => {
   try {
     logger.info('app: config app');
     // language
-    const language = cacheMaker.get('language') ?? 'japanese';
+    const language: string = cacheMaker.get('language') ?? 'japanese';
     // goto config page
     await mainWindow.loadFile(path.join(globalRootPath, 'www', 'config.html'));
     // language
@@ -619,7 +619,7 @@ ipcMain.on('config', async (event: any, _) => {
 });
 
 // save
-ipcMain.on('save', async (event: any, arg: any) => {
+ipcMain.on('save', async (event: any, arg: any): Promise<void> => {
   try {
     logger.info('app: save config');
     // language
@@ -644,13 +644,13 @@ ipcMain.on('save', async (event: any, arg: any) => {
   }
 });
 
-ipcMain.on('top', async (event: any, _) => {
+ipcMain.on('top', async (event: any, _): Promise<void> => {
   try {
     logger.info('app: top');
     // goto config page
     await mainWindow.loadFile(path.join(globalRootPath, 'www', 'index.html'));
     // language
-    const language = cacheMaker.get('language') ?? '';
+    const language: string = cacheMaker.get('language') ?? '';
     // language
     event.sender.send('ready', language);
   } catch (e: unknown) {
@@ -664,7 +664,7 @@ ipcMain.on('top', async (event: any, _) => {
 });
 
 // exit
-ipcMain.on('exit', async () => {
+ipcMain.on('exit', async (): Promise<void> => {
   try {
     logger.info('ipc: exit mode');
     // title
@@ -672,7 +672,7 @@ ipcMain.on('exit', async () => {
     // message
     let questionMessage: string = '';
     // language
-    const language = cacheMaker.get('language') ?? 'japanese';
+    const language: string = cacheMaker.get('language') ?? 'japanese';
     // japanese
     if (language == 'japanese') {
       questionTitle = '終了';
