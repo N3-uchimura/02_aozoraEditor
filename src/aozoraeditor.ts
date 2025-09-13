@@ -682,7 +682,7 @@ ipcMain.on('extra', async (): Promise<void> => {
     // csv file name
     const csvFileName: string = (new Date).toISOString().replace(/[^\d]/g, '').slice(0, 14);
     // desktop path
-    const filePath: string = path.join(dir_desktop, csvFileName + '.csv');
+    const filePath: string = path.join(dir_desktop, 'aozora', csvFileName + '.csv');
     // write data
     await csvMaker.makeCsvData(resultArray, myConst.SHEET_TITLES, filePath);
     // complete
