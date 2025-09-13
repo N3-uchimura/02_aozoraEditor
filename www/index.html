@@ -25,6 +25,11 @@
     <h3 id="rename">Rename</h3>
     <button id="rename_button" class="button-g button-wide" value="rename" onclick="gotoRename()">Rename</button>
   </div>
+  <p><i class="arrow down"></i></p>
+  <div class="extra_area">
+    <h3 id="extra">Extra</h3>
+    <button id="extra_button" class="button-g button-6 button-wide" value="extra" onclick="gotoExtra()">Extra</button>
+  </div>
   <div class="config_area">
     <h3 id="config">Config</h3>
     <button id="config_button" class="button-g button-6 button-wide" value="config"
@@ -45,6 +50,7 @@
     const EXTRACT_STR_JA = 'ZIP解凍';
     const MODIFY_STR_JA = 'TXT修正';
     const RENAME_STR_JA = 'リネーム';
+    const INTRO_STR_JA = '先頭抽出';
     const CONFIG_STR_JA = '設定';
     const EXIT_STR_JA = '終了';
     // english
@@ -52,6 +58,7 @@
     const EXTRACT_STR_EN = 'Extract';
     const MODIFY_STR_EN = 'Modify';
     const RENAME_STR_EN = 'Rename';
+    const INTRO_STR_EN = 'Extra';
     const CONFIG_STR_EN = 'Config';
     const EXIT_STR_EN = 'Exit';
     /// doms
@@ -62,6 +69,8 @@
     const modifyButtonDom = document.getElementById('modify_button');
     const renameDom = document.getElementById('rename');
     const renameButtonDom = document.getElementById('rename_button');
+    const extraDom = document.getElementById('extra');
+    const extraButtonDom = document.getElementById('extra_button');
     const configDom = document.getElementById('config');
     const configButtonDom = document.getElementById('config_button');
     const exitButtonDom = document.getElementById('exit_button');
@@ -116,6 +125,19 @@
       }
     }
 
+    // extra function
+    const gotoExtra = () => {
+      try {
+        console.log('extra');
+        // extra
+        window.api.send('extra');
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    }
+
     // goto config page
     const gotoConfig = () => {
       try {
@@ -154,6 +176,8 @@
         modifyButtonDom.innerHTML = MODIFY_STR_JA;
         renameDom.innerHTML = RENAME_STR_JA;
         renameButtonDom.innerHTML = RENAME_STR_JA;
+        extraDom.innerHTML = INTRO_STR_JA;
+        extraButtonDom.innerHTML = INTRO_STR_JA;
         configDom.innerHTML = CONFIG_STR_JA;
         configButtonDom.innerHTML = CONFIG_STR_JA;
         exitButtonDom.innerHTML = EXIT_STR_JA;
@@ -168,6 +192,8 @@
         modifyButtonDom.innerHTML = MODIFY_STR_EN;
         renameDom.innerHTML = RENAME_STR_EN;
         renameButtonDom.innerHTML = RENAME_STR_EN;
+        extraDom.innerHTML = INTRO_STR_EN;
+        extraButtonDom.innerHTML = INTRO_STR_EN;
         configDom.innerHTML = CONFIG_STR_EN;
         configButtonDom.innerHTML = CONFIG_STR_EN;
         exitButtonDom.innerHTML = EXIT_STR_EN;

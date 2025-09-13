@@ -20,10 +20,11 @@ import iconv from 'iconv-lite'; // Text converter
 import extract from 'extract-zip'; // extract zip file
 import Encoding from 'encoding-japanese'; // for encoding
 import NodeCache from "node-cache"; // node-cache
-import { Modifiy } from './class/ElTextModifiy0824'; // modifier
+import { Modifiy } from './class/ElTextModifiy0914'; // modifier
 import ELLogger from './class/ElLogger'; // logger
 import Dialog from './class/ElDialog0721'; // dialog
 import MKDir from './class/ElMkdir0414'; // mdkir
+import CSV from './class/ElCsv0414'; // csvmaker
 
 // log level
 const LOG_LEVEL: string = myConst.LOG_LEVEL ?? 'all';
@@ -37,6 +38,8 @@ const mkdirManager: any = new MKDir(logger);
 const modifyMaker: Modifiy = new Modifiy(logger);
 // cache instance
 const cacheMaker: NodeCache = new NodeCache();
+// csv instance
+const csvMaker = new CSV(myConst.CSV_ENCODING, logger);
 
 /// interfaces
 // window option
@@ -63,6 +66,10 @@ if (!myConst.DEVMODE) {
 } else {
   globalRootPath = path.join(__dirname, '..');
 }
+// desktop path
+const dir_home =
+  process.env[process.platform == 'win32' ? 'USERPROFILE' : 'HOME'] ?? '';
+const dir_desktop = path.join(dir_home, 'Desktop');
 // make file dir
 const baseFilePath: string = path.join(globalRootPath, 'file');
 
@@ -167,7 +174,7 @@ app.on('ready', async (): Promise<void> => {
 
     // make dir
     await mkdirManager.mkDir(baseFilePath);
-    await mkdirManager.mkDirAll([path.join(baseFilePath, 'source'), path.join(baseFilePath, 'tmp'), path.join(baseFilePath, 'renamed'), path.join(baseFilePath, 'modified'), path.join(baseFilePath, 'extracted')]);
+    await mkdirManager.mkDirAll([path.join(baseFilePath, 'source'), path.join(baseFilePath, 'tmp'), path.join(baseFilePath, 'renamed'), path.join(baseFilePath, 'modified'), path.join(baseFilePath, 'extracted'), path.join(baseFilePath, 'intro'),]);
     // icons
     const icon: Electron.NativeImage = nativeImage.createFromPath(path.join(globalRootPath, 'assets', 'aozora.ico'));
     // tray
@@ -597,6 +604,101 @@ ipcMain.on('rename', async (): Promise<void> => {
     }
   }
 });
+
+// extra
+ipcMain.on('extra', async (): Promise<void> => {
+  try {
+    logger.info('ipc: extra mode');
+    // str variables
+    let strArray: any[] = [];
+    // language
+    const language: any = cacheMaker.get('language') ?? 'japanese';
+    // file list
+    const files: string[] = await readdir(path.join(baseFilePath, 'intro'));
+    // if empty
+    if (files.length == 0) {
+      // japanese
+      if (language == 'japanese') {
+        throw new Error('対象のファイルが空です(file/intro)。');
+      } else {
+        throw new Error('file/intro directory is empty.');
+      }
+    }
+    logger.debug('extra: txt exists');
+
+    // loop for files
+    const resultArray: any[] = await Promise.all(files.map((fl: string): Promise<any> => {
+      return new Promise(async (resolve, _) => {
+        try {
+          // str header
+          let strObj: { [key: string]: string } = {
+            filename: '',
+            intro: '',
+          };
+          // filepath
+          const filePath: string = path.join(baseFilePath, 'intro', fl);
+
+          // not exists
+          if (existsSync(filePath)) {
+            // read files
+            const txtdata: any = await readFile(filePath);
+            // detect charcode
+            const detectedEncoding: string | boolean = Encoding.detect(txtdata);
+            logger.silly('extra: ' + detectedEncoding);
+            // without string
+            if (typeof (detectedEncoding) !== 'string') {
+              // japanese
+              if (language == 'japanese') {
+                throw new Error('エンコーディングエラー');
+              } else {
+                throw new Error('error-encoding');
+              }
+            }
+            // decode
+            const str: string = iconv.decode(txtdata, detectedEncoding);
+            logger.silly('extra: char decoding finished.');
+            // start strings
+            const startStr: string = await modifyMaker.getFirstLine(str);
+            // get into array
+            strObj['filename'] = fl;
+            strObj['intro'] = startStr;
+            // error
+            if (startStr == 'error') {
+              logger.error('extra: none');
+            }
+            logger.silly('extra: finished');
+            // finish
+            resolve(strObj);
+          }
+          logger.debug('extra: writing finished.');
+
+        } catch (err: unknown) {
+          // error
+          logger.error(err);
+        }
+      })
+    }));
+    console.log(resultArray);
+    // csv file name
+    const csvFileName: string = (new Date).toISOString().replace(/[^\d]/g, '').slice(0, 14);
+    // desktop path
+    const filePath: string = path.join(dir_desktop, csvFileName + '.csv');
+    // write data
+    await csvMaker.makeCsvData(resultArray, myConst.SHEET_TITLES, filePath);
+    // complete
+    logger.info('ipc: extra completed');
+    dialogMaker.showmessage('info', 'extra completed.');
+
+  } catch (e: unknown) {
+    logger.error(e);
+    // error
+    if (e instanceof Error) {
+      // error message
+      dialogMaker.showmessage('error', e.message);
+    }
+  }
+});
+
 
 // config
 ipcMain.on('config', async (event: any, _): Promise<void> => {

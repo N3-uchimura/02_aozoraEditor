@@ -43,6 +43,7 @@ Windows10 ~
 - Extract: extract zip to txt. out from ./file/source to ./file/extracted.
 - Modify: modify unnecessary text and old character to new one. from ./file/extracted out to ./file/modified.
 - Rename: rename filename to formatted style. out from ./file/modified to "./file/renamed".
+- Extra: extract first line from txt file in ./file/intro and export to desktop as csv file.
 
 ## Features
 

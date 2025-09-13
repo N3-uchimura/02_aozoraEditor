@@ -3,7 +3,7 @@
  *
  * ElTextModifiy
  * function：text modifier
- * updated: 2025/08/24
+ * updated: 2025/09/14
  **/
 
 'use strict';
@@ -14,6 +14,10 @@ import { jionArray } from '../lib/dic-jion';
 import { kanaArray } from '../lib/dic-kana';
 import { kanjiArray } from '../lib/dic-kanji';
 import { smallArray } from '../lib/dic-small';
+
+// global variables
+const ARRAY_LENGTH: number = 10;
+const LINE_LENGTH: number = 30;
 
 //* Interfaces
 interface removed {
@@ -30,6 +34,41 @@ export class Modifiy {
     // loggeer instance
     Modifiy.logger = logger;
     Modifiy.logger.debug('modify: constructed');
+  }
+
+  // get first line
+  getFirstLine(str: string): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        Modifiy.logger.silly('modify: get first line');
+        // start flg
+        let startFlg: boolean = false;
+        // tmp str
+        let tmpStr: string = '';
+        // split
+        const result: string[] = str.split(/\r\n|\n|\r/);
+        // target array
+        const targetArray: string[] = result.slice(0, ARRAY_LENGTH);
+        // loop
+        for (let i = 0; i < targetArray.length; i++) {
+          // start line
+          if (startFlg && targetArray[i] != '') {
+            tmpStr = targetArray[i].slice(0, LINE_LENGTH);
+            break;
+          }
+          if (targetArray[i] == '') {
+            startFlg = true;
+          }
+        }
+        // complete
+        resolve(tmpStr);
+
+      } catch (e: unknown) {
+        Modifiy.logger.error(e);
+        // reject
+        reject('error');
+      }
+    });
   }
 
   // remove annotation
