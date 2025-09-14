@@ -43,13 +43,16 @@ Windows10 ~
 
 ## Usage
 
-1. ダウンロードした ZIP ファイルを、「./file/source」に入れます。
+1. ダウンロードした ZIP ファイルを、「resources/file/source」に入れます。
 2. 以下のボタンを上から順番に押していきます。
 
-- ZIP 解凍:「./file/source」内の ZIP ファイルを解凍し、解凍した TXT ファイルを「./file/extracted」内に保存します。
-- TXT 修正: 「./file/extracted」内の TXT ファイルそれぞれに対し、不要なテキストを除去し、旧字体/旧かなを新字体/新かなに置換して「./file/modified」に保存します。
-- リネーム: 「./file/modified」内の TXT ファイル名を「ID*作品名*作者名.txt」に変換し、「./file/renamed"」内に保存します。
-- （番外編）イントロ: 「./file/intro」内の TXT ファイル名から書き出しの文章を抽出し、デスクトップに CSV として書き出します。
+- ZIP 解凍:「resources/file/source」内の ZIP ファイルを解凍し、解凍した TXT ファイルを「resources/file/extracted」内に保存します。
+- TXT 修正: 「resources/file/extracted」内の TXT ファイルそれぞれに対し、不要なテキストを除去し、旧字体/旧かなを新字体/新かなに置換して「resources/file/modified」に保存します。
+- リネーム: 「resources/file/modified」内の TXT ファイル名を「ID*作品名*作者名.txt」に変換し、「resources/file/renamed"」内に保存します。
+- （番外編）先頭抽出: 「resources/file/intro」内の TXT ファイル名から書き出しの文章を抽出し、デスクトップに CSV として書き出します。ラジオボタンは以下のとおりです。
+  - 1 行目: 文章部分の 1 行目を抽出します。
+  - 1 行目+: 最初にヒットした記号を無視して、文章部分の 1 行目を抽出します。
+  - 2 行目: 文章部分の 2 行目を抽出します。
 
 ## Features
 

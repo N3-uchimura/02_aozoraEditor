@@ -37,13 +37,16 @@ Windows10 ~
 
 ## Usage
 
-1. put zip files into ./file/source.
+1. put zip files into resources/file/source.
 2. Press any buttons.
 
-- Extract: extract zip to txt. out from ./file/source to ./file/extracted.
-- Modify: modify unnecessary text and old character to new one. from ./file/extracted out to ./file/modified.
-- Rename: rename filename to formatted style. out from ./file/modified to "./file/renamed".
-- Extra: extract first line from txt file in ./file/intro and export to desktop as csv file.
+- Extract: extract zip to txt. out from resources/file/source to resources/file/extracted.
+- Modify: modify unnecessary text and old character to new one. from resources/file/extracted out to resources/file/modified.
+- Rename: rename filename to formatted style. out from resources/file/modified to resources/file/renamed.
+- Extra: extract first line from txt file in resources/file/intro and export to desktop as csv file. radio explanation is below.
+  - 1st line: extract first text line.
+  - 1st line\*: extract first text line ignoring symbol.
+  - 2nd line: extract second text line.
 
 ## Features
 
