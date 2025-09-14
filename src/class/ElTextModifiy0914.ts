@@ -16,7 +16,7 @@ import { kanjiArray } from '../lib/dic-kanji';
 import { smallArray } from '../lib/dic-small';
 
 // global variables
-const ARRAY_LENGTH: number = 10;
+const ARRAY_LENGTH: number = 30;
 const LINE_LENGTH: number = 30;
 
 //* Interfaces
@@ -37,12 +37,14 @@ export class Modifiy {
   }
 
   // get first line
-  getFirstLine(str: string): Promise<string> {
+  getFirstLine(str: string, flg: boolean): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
         Modifiy.logger.silly('modify: get first line');
         // start flg
         let startFlg: boolean = false;
+        // final flg
+        let finalFlg: boolean = false;
         // tmp str
         let tmpStr: string = '';
         // split
@@ -51,10 +53,54 @@ export class Modifiy {
         const targetArray: string[] = result.slice(0, ARRAY_LENGTH);
         // loop
         for (let i = 0; i < targetArray.length; i++) {
-          // start line
-          if (startFlg && targetArray[i] != '') {
+          // final one
+          if (finalFlg && targetArray[i] != '') {
             tmpStr = targetArray[i].slice(0, LINE_LENGTH);
             break;
+          }
+          // start line
+          if (startFlg && targetArray[i] != '') {
+            finalFlg = true;
+          }
+          if (targetArray[i] == '') {
+            startFlg = true;
+          }
+        }
+        // complete
+        resolve(tmpStr);
+
+      } catch (e: unknown) {
+        Modifiy.logger.error(e);
+        // reject
+        reject('error');
+      }
+    });
+  }
+
+  // get second line
+  getSecondLine(str: string): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        Modifiy.logger.silly('modify: get second line');
+        // start flg
+        let startFlg: boolean = false;
+        // second flg
+        let secondFlg: boolean = false;
+        // tmp str
+        let tmpStr: string = '';
+        // split
+        const result: string[] = str.split(/\r\n|\n|\r/);
+        // target array
+        const targetArray: string[] = result.slice(0, ARRAY_LENGTH);
+        // loop
+        for (let i = 0; i < targetArray.length; i++) {
+          // seconde one
+          if (secondFlg && targetArray[i] != '') {
+            tmpStr = targetArray[i].slice(0, LINE_LENGTH);
+          }
+          // start line
+          if (startFlg && targetArray[i] != '') {
+            secondFlg = true;
           }
           if (targetArray[i] == '') {
             startFlg = true;

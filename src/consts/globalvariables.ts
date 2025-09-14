@@ -10,7 +10,7 @@ export namespace myConst {
   export const DEVMODE: boolean = true;
   export const COMPANY_NAME: string = "nthree";
   export const APP_NAME: string = "aozoraeditor";
-  export const LOG_LEVEL: string = "debug";
+  export const LOG_LEVEL: string = "info";
   export const DEFAULT_ENCODING: string = "utf8";
   export const CSV_ENCODING: string = 'SJIS';
   export const SHEET_TITLES: string[] = ['filename', 'intro'];

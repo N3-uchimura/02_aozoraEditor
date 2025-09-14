@@ -606,17 +606,17 @@ ipcMain.on('rename', async (): Promise<void> => {
 });
 
 // extra
-ipcMain.on('extra', async (): Promise<void> => {
+ipcMain.on('extra', async (_: any, arg: any): Promise<void> => {
   try {
     logger.info('ipc: extra mode');
-    // str variables
-    let strArray: any[] = [];
+    // final array
+    let finalArray: any = [];
     // language
     const language: any = cacheMaker.get('language') ?? 'japanese';
     // file list
-    const files: string[] = await readdir(path.join(baseFilePath, 'intro'));
+    const sourceFiles: string[] = await readdir(path.join(baseFilePath, 'intro'));
     // if empty
-    if (files.length == 0) {
+    if (sourceFiles.length == 0) {
       // japanese
       if (language == 'japanese') {
         throw new Error('対象のファイルが空です(file/intro)。');
@@ -626,65 +626,86 @@ ipcMain.on('extra', async (): Promise<void> => {
     }
     logger.debug('extra: txt exists');
 
-    // loop for files
-    const resultArray: any[] = await Promise.all(files.map((fl: string): Promise<any> => {
-      return new Promise(async (resolve, _) => {
-        try {
-          // str header
-          let strObj: { [key: string]: string } = {
-            filename: '',
-            intro: '',
-          };
-          // filepath
-          const filePath: string = path.join(baseFilePath, 'intro', fl);
+    // chunked
+    const finalTxtFiles: any[] = arrayChunk(sourceFiles, 100);
 
-          // not exists
-          if (existsSync(filePath)) {
-            // read files
-            const txtdata: any = await readFile(filePath);
-            // detect charcode
-            const detectedEncoding: string | boolean = Encoding.detect(txtdata);
-            logger.silly('extra: ' + detectedEncoding);
-            // without string
-            if (typeof (detectedEncoding) !== 'string') {
-              // japanese
-              if (language == 'japanese') {
-                throw new Error('エンコーディングエラー');
-              } else {
-                throw new Error('error-encoding');
+    for (const files of finalTxtFiles) {
+      // loop for files
+      await Promise.allSettled(files.map((fl: string): Promise<void> => {
+        return new Promise(async (resolve, _) => {
+          try {
+            logger.debug('extra: ' + fl);
+            // str header
+            let strObj: { [key: string]: string } = {
+              filename: '',
+              intro: '',
+            };
+            // filepath
+            const filePath: string = path.join(baseFilePath, 'intro', fl);
+
+            // not exists
+            if (existsSync(filePath)) {
+              // read files
+              const txtdata: any = await readFile(filePath);
+              // detect charcode
+              let detectedEncoding: string | boolean = Encoding.detect(txtdata);
+              logger.silly('extra: ' + detectedEncoding);
+              // without string
+              if (typeof (detectedEncoding) !== 'string') {
+                // japanese
+                if (language == 'japanese') {
+                  logger.error('エンコーディングエラー');
+                  detectedEncoding = myConst.CSV_ENCODING;
+                } else {
+                  logger.error('error-encoding');
+                  detectedEncoding = myConst.DEFAULT_ENCODING;
+                }
+              } else if (detectedEncoding == 'UNICODE') {
+                detectedEncoding = myConst.DEFAULT_ENCODING;
               }
+              // decode
+              const str: string = iconv.decode(txtdata, detectedEncoding);
+              logger.silly('extra: char decoding finished.');
+              // line
+              if (arg == 'first') {
+                // first strings
+                strObj['intro'] = await modifyMaker.getFirstLine(str, false);
+              } else if (arg == 'firstplus') {
+                // first strings
+                strObj['intro'] = await modifyMaker.getFirstLine(str, true);
+              } else if (arg == 'second') {
+                // second strings
+                strObj['intro'] = await modifyMaker.getSecondLine(str);
+              } else {
+                // japanese
+                if (language == 'japanese') {
+                  throw new Error('不正なリクエストです');
+                } else {
+                  throw new Error('bad request.');
+                }
+              }
+              // get into array
+              strObj['filename'] = fl;
+              logger.silly('extra: finished');
+              // finish
+              finalArray.push(strObj);
             }
-            // decode
-            const str: string = iconv.decode(txtdata, detectedEncoding);
-            logger.silly('extra: char decoding finished.');
-            // start strings
-            const startStr: string = await modifyMaker.getFirstLine(str);
-            // get into array
-            strObj['filename'] = fl;
-            strObj['intro'] = startStr;
-            // error
-            if (startStr == 'error') {
-              logger.error('extra: none');
-            }
-            logger.silly('extra: finished');
-            // finish
-            resolve(strObj);
-          }
-          logger.debug('extra: writing finished.');
+            resolve();
+            logger.debug('extra: writing finished.');
 
-        } catch (err: unknown) {
-          // error
-          logger.error(err);
-        }
-      })
-    }));
-    console.log(resultArray);
+          } catch (err: unknown) {
+            // error
+            logger.error(err);
+          }
+        });
+      }));
+    }
     // csv file name
     const csvFileName: string = (new Date).toISOString().replace(/[^\d]/g, '').slice(0, 14);
     // desktop path
-    const filePath: string = path.join(dir_desktop, 'aozora', csvFileName + '.csv');
+    const filePath: string = path.join(dir_desktop, csvFileName + '.csv');
     // write data
-    await csvMaker.makeCsvData(resultArray, myConst.SHEET_TITLES, filePath);
+    await csvMaker.makeCsvData(finalArray, myConst.SHEET_TITLES, filePath);
     // complete
     logger.info('ipc: extra completed');
     dialogMaker.showmessage('info', 'extra completed.');
@@ -698,7 +719,6 @@ ipcMain.on('extra', async (): Promise<void> => {
     }
   }
 });
-
 
 // config
 ipcMain.on('config', async (event: any, _): Promise<void> => {
@@ -796,3 +816,13 @@ ipcMain.on('exit', async (): Promise<void> => {
     logger.error(e);
   }
 });
+
+// array chunk
+const arrayChunk = <T>(array: T[], size: number): T[][] => {
+  if (size <= 0) return [[]];
+  const result = [];
+  for (let i = 0, j = array.length; i < j; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+}

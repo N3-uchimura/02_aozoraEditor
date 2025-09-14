@@ -15,19 +15,22 @@
     <h3 id="extract">Extract</h3>
     <button id="extract_button" class="button-g button-wide" value="extract" onclick="gotoExtract()">Extract</button>
   </div>
-  <p><i class="arrow down"></i></p>
   <div class="operation_area">
     <h3 id="modify">Modify</h3>
     <button id="modify_button" class="button-g button-wide" value="modify" onclick="gotoModify();">Modify</button>
   </div>
-  <p><i class="arrow down"></i></p>
   <div class="operation_area">
     <h3 id="rename">Rename</h3>
     <button id="rename_button" class="button-g button-wide" value="rename" onclick="gotoRename()">Rename</button>
   </div>
-  <p><i class="arrow down"></i></p>
   <div class="extra_area">
     <h3 id="extra">Extra</h3>
+    <div id="selectarea">
+      <input type="radio" name="mode" value="first" checked><label id="firstlabel" for="first">1st line</label>
+      <input type="radio" name="mode" value="firstplus"><label id="firstpluslabel" for="firstplus">1st
+        line*</label>
+      <input type="radio" name="mode" value="second"><label id="secondlabel" for="second">2nd line</label>
+    </div>
     <button id="extra_button" class="button-g button-6 button-wide" value="extra" onclick="gotoExtra()">Extra</button>
   </div>
   <div class="config_area">
@@ -50,6 +53,9 @@
     const EXTRACT_STR_JA = 'ZIP解凍';
     const MODIFY_STR_JA = 'TXT修正';
     const RENAME_STR_JA = 'リネーム';
+    const FIRST_STR_JA = '1行目';
+    const FIRSTPLIS_STR_JA = '1行目*';
+    const SECOND_STR_JA = '2行目';
     const INTRO_STR_JA = '先頭抽出';
     const CONFIG_STR_JA = '設定';
     const EXIT_STR_JA = '終了';
@@ -58,6 +64,9 @@
     const EXTRACT_STR_EN = 'Extract';
     const MODIFY_STR_EN = 'Modify';
     const RENAME_STR_EN = 'Rename';
+    const FIRST_STR_EN = '1st line';
+    const FIRSTPLIS_STR_EN = '1 line*';
+    const SECOND_STR_EN = '2nd line';
     const INTRO_STR_EN = 'Extra';
     const CONFIG_STR_EN = 'Config';
     const EXIT_STR_EN = 'Exit';
@@ -69,6 +78,12 @@
     const modifyButtonDom = document.getElementById('modify_button');
     const renameDom = document.getElementById('rename');
     const renameButtonDom = document.getElementById('rename_button');
+    const firstLabelDom = document.getElementById('firstlabel');
+    const firstPlusLabelDom = document.getElementById('firstpluslabel');
+    const firstDom = document.getElementById('first');
+    const firstPlusDom = document.getElementById('firstplus');
+    const secondLabelDom = document.getElementById('secondlabel');
+    const secondDom = document.getElementById('second');
     const extraDom = document.getElementById('extra');
     const extraButtonDom = document.getElementById('extra_button');
     const configDom = document.getElementById('config');
@@ -129,8 +144,10 @@
     const gotoExtra = () => {
       try {
         console.log('extra');
+        // get selected
+        const value = document.querySelector("input[name='mode']:checked").value;
         // extra
-        window.api.send('extra');
+        window.api.send('extra', value);
 
       } catch (e) {
         // error
@@ -176,6 +193,9 @@
         modifyButtonDom.innerHTML = MODIFY_STR_JA;
         renameDom.innerHTML = RENAME_STR_JA;
         renameButtonDom.innerHTML = RENAME_STR_JA;
+        firstLabelDom.innerHTML = FIRST_STR_JA;
+        firstPlusLabelDom.innerHTML = FIRSTPLIS_STR_JA;
+        secondLabelDom.innerHTML = SECOND_STR_JA;
         extraDom.innerHTML = INTRO_STR_JA;
         extraButtonDom.innerHTML = INTRO_STR_JA;
         configDom.innerHTML = CONFIG_STR_JA;
@@ -192,6 +212,9 @@
         modifyButtonDom.innerHTML = MODIFY_STR_EN;
         renameDom.innerHTML = RENAME_STR_EN;
         renameButtonDom.innerHTML = RENAME_STR_EN;
+        firstLabelDom.innerHTML = FIRST_STR_EN;
+        firstPlusLabelDom.innerHTML = FIRSTPLIS_STR_EN;
+        secondLabelDom.innerHTML = SECOND_STR_EN;
         extraDom.innerHTML = INTRO_STR_EN;
         extraButtonDom.innerHTML = INTRO_STR_EN;
         configDom.innerHTML = CONFIG_STR_EN;
