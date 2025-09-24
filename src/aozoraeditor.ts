@@ -12,7 +12,7 @@ import { myConst, myNums } from './consts/globalvariables';
 
 /// Modules
 import * as path from 'node:path'; // path
-import { existsSync } from 'node:fs'; // file system
+import { readFileSync, existsSync } from 'node:fs'; // file system
 import { unlink, copyFile, readFile, writeFile, rename, readdir } from 'node:fs/promises'; // file system (Promise)
 import { setTimeout } from 'node:timers/promises'; // wait for seconds
 import { BrowserWindow, app, ipcMain, Tray, Menu, nativeImage } from 'electron'; // electron
@@ -369,7 +369,6 @@ ipcMain.on('modify', async (): Promise<void> => {
     await Promise.all(files.map((fl: string): Promise<void> => {
       return new Promise(async (resolve, _) => {
         try {
-          let finalStr: any;
           // filepath
           const filePath: string = path.join(baseFilePath, 'extracted', fl);
 
@@ -394,69 +393,42 @@ ipcMain.on('modify', async (): Promise<void> => {
             logger.debug('char decoding finished.');
             // repeat strings
             const removedStr0: string = await modifyMaker.repeatCharacter(str);
-            if (removedStr0 == 'error') {
-              logger.error('0: none');
-            }
             logger.debug('0: finished');
             // annotations
             const removedStr1: any = await modifyMaker.removeAnnotation(removedStr0);
-            // check type
-            if (typeof (removedStr1) == 'string') {
-              logger.debug('string');
-              finalStr = {
-                header: '',
-                body: removedStr0,
-              }
-            } else {
-              logger.debug('not string');
-              finalStr = removedStr1;
-            }
             logger.debug('1: finished');
             // remove footer
-            const removedStr2: string = await modifyMaker.removeFooter(finalStr.body);
-            if (removedStr2 == 'error') {
-              logger.error('error2');
-            }
+            const removedStr2: string = await modifyMaker.removeFooter(removedStr1.body);
             logger.debug('2: finished');
             // remove ryby(《》)
             const removedStr3: string = await modifyMaker.removeRuby(removedStr2);
-            if (removedStr3 == 'error') {
-              logger.error('error3');
-            }
             logger.debug('3: finished');
             // remove angle bracket([])
             const removedStr4: string = await modifyMaker.removeBrackets(removedStr3);
-            if (removedStr4 == 'error') {
-              logger.error('error4');
-            }
             logger.debug('4: finished');
             // remove unnecessary string
             const removedStr5: string = await modifyMaker.removeSymbols(removedStr4);
-            if (removedStr5 == 'error') {
-              logger.error('error5');
-            }
             logger.debug('5: finished');
-
             // exchange kanji
             const removedStr6: string = await modifyMaker.replaceOldToNew(removedStr5, 1);
-            if (removedStr6 == 'error') {
-              logger.error('error6');
-            }
             logger.debug('6: finished');
             // exchange kana
             const removedStr7: string = await modifyMaker.replaceOldToNew(removedStr6, 2);
-            if (removedStr7 == 'error') {
-              logger.error('error7');
-            }
+            logger.debug('7: finished');
             // exchange small
             const removedStr8: string = await modifyMaker.replaceOldToNew(removedStr7, 3);
-            if (removedStr8 == 'error') {
-              logger.error('error8');
-            }
+            logger.debug('8: finished');
             // filepath output
             const outPath: string = path.join(baseFilePath, 'modified', fl);
-            // write out to file
-            await writeFile(outPath, removedStr1.header + removedStr8);
+            // header none
+            if (removedStr1.header == undefined) {
+              // write out to file
+              await writeFile(outPath, removedStr8);
+            } else {
+              // write out to file
+              await writeFile(outPath, removedStr1.header + removedStr8);
+            }
+
           }
           logger.info('writing finished.');
           resolve();
@@ -501,7 +473,7 @@ ipcMain.on('rename', async (): Promise<void> => {
     }
     // promise
     await Promise.all(files.map((fl: string, idx: number): Promise<void> => {
-      return new Promise(async (resolve1, _) => {
+      return new Promise(async (resolve1, reject1) => {
         try {
           // file name
           let newFileName: string = '';
@@ -512,7 +484,7 @@ ipcMain.on('rename', async (): Promise<void> => {
           // renamed path
           const renamePath: string = path.join(baseFilePath, 'renamed');
           // file reading
-          const txtdata: Buffer = await readFile(filePath);
+          const txtdata: Buffer = readFileSync(filePath);
           // char encode
           const detectedEncoding: string | boolean = Encoding.detect(txtdata);
           logger.silly('rename: ' + detectedEncoding);
@@ -534,7 +506,7 @@ ipcMain.on('rename', async (): Promise<void> => {
           // author
           const authorStr: string = strArray[2];
           // index
-          const paddedIndex: string = (idx + 8189).toString().padStart(5, '0');
+          const paddedIndex: string = (idx).toString().padStart(5, '0');
 
           if (!authorStr) {
             // filename
@@ -572,10 +544,6 @@ ipcMain.on('rename', async (): Promise<void> => {
           }));
 
           if (tmpStr.length < 255) {
-            // backup file
-            const backupPath: string = path.join(rootFilePath, `bk_${fl}`);
-            // copy
-            await copyFile(filePath, backupPath);
             // rename
             await rename(filePath, tmpStr);
             // wait for 1sec
@@ -583,6 +551,8 @@ ipcMain.on('rename', async (): Promise<void> => {
 
             // result
             resolve1();
+          } else {
+            reject1();
           }
 
         } catch (err: unknown) {

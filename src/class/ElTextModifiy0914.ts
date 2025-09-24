@@ -129,13 +129,18 @@ export class Modifiy {
         if (str.includes(annotation)) {
           // split
           const result: string[] = str.split(annotation);
+          // header
+          const header: string = result[0] ?? '';
           // complete
           resolve({
-            header: result[0],
+            header: header,
             body: str.split(annotation)[2],
           });
         } else {
-          resolve('error');
+          resolve({
+            header: '',
+            body: str,
+          });
         }
 
       } catch (e: unknown) {
@@ -152,7 +157,7 @@ export class Modifiy {
       try {
         Modifiy.logger.silly('modify: remove footer annotation');
         // distinction
-        const annotation: string = '底本：';
+        const annotation: string = '青空文庫作成ファイル：';
         // remove footer
         if (str.includes(annotation)) {
           // split
@@ -160,7 +165,7 @@ export class Modifiy {
           // result
           resolve(result[0]);
         } else {
-          resolve('error');
+          resolve(str);
         }
 
       } catch (e: unknown) {
