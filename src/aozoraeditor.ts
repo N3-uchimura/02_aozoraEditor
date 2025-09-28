@@ -101,16 +101,6 @@ const createWindow = (): void => {
       }
     });
 
-    // stay at tray
-    mainWindow.on('will-resize', (event: any): void => {
-      // avoid Wclick
-      event.preventDefault();
-      // hide window
-      mainWindow.hide();
-      // returnfalse
-      event.returnValue = false;
-    });
-
     // close window
     mainWindow.on('close', (event: any): void => {
       // not closing
