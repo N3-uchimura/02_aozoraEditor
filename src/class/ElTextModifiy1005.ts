@@ -37,14 +37,16 @@ export class Modifiy {
   }
 
   // get partial line
-  getPartialLine(str: string, flg: number): Promise<string> {
+  getPartialLine(str: string, mode: number): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
-        Modifiy.logger.silly('modify: get partial line');
+        Modifiy.logger.silly(`modify: get partial line on ${mode} mode`);
         // start flg
         let startFlg: boolean = false;
-        // final flg
-        let finalFlg: boolean = false;
+        // second flg
+        let secondFlg: boolean = false;
+        // third flg
+        let thirdFlg: boolean = false;
         // tmp str
         let tmpStr: string = '';
         // split
@@ -57,26 +59,54 @@ export class Modifiy {
           if (targetArray[i] == '') {
             startFlg = true;
           } else {
-            // final one
-            if (finalFlg) {
+            // third one
+            if (thirdFlg) {
+              // set text
               tmpStr = targetArray[i].slice(0, LINE_LENGTH);
               break;
             }
-            // start line
-            if (startFlg) {
-              // symbol flg
-              if (flg == 0) {
+            // second one
+            if (secondFlg) {
+              // second mode
+              if (mode == 2) {
+                // set text
                 tmpStr = targetArray[i].slice(0, LINE_LENGTH);
                 break;
-              } else if (flg == 1) {
+                // third mode
+              } else if (mode == 3) {
+                thirdFlg = true;
+                // goto next
+                continue;
+              } else {
+                // error
+                Modifiy.logger.error('error');
+                break;
+              }
+            }
+            // start line
+            if (startFlg) {
+              // mode
+              if (mode == 0) {
+                // set text
+                tmpStr = targetArray[i].slice(0, LINE_LENGTH);
+                break;
+              } else if (mode == 1) {
+                // under 5 chara
                 if (targetArray[i].length < 5) {
-                  continue
+                  // goto next
+                  continue;
                 } else {
+                  // set text
                   tmpStr = targetArray[i].slice(0, LINE_LENGTH);
                   break;
                 }
+              } else if (mode > 1) {
+                // goto second
+                secondFlg = true
               } else {
-                finalFlg = true
+                // error
+                Modifiy.logger.error('error');
+                break;
               }
             }
           }

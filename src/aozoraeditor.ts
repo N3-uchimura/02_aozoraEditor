@@ -418,7 +418,6 @@ ipcMain.on('modify', async (): Promise<void> => {
               // write out to file
               await writeFile(outPath, removedStr1.header + removedStr8);
             }
-
           }
           logger.info('writing finished.');
           resolve();
@@ -636,6 +635,9 @@ ipcMain.on('extra', async (_: any, arg: any): Promise<void> => {
               } else if (arg == 'second') {
                 // second strings
                 strObj['intro'] = await modifyMaker.getPartialLine(str, 2);
+              } else if (arg == 'third') {
+                // third strings
+                strObj['intro'] = await modifyMaker.getPartialLine(str, 3);
               } else {
                 // japanese
                 if (language == 'japanese') {

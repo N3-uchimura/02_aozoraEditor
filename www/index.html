@@ -30,6 +30,7 @@
       <input type="radio" name="mode" value="firstplus"><label id="firstpluslabel" for="firstplus">1st
         line*</label>
       <input type="radio" name="mode" value="second"><label id="secondlabel" for="second">2nd line</label>
+      <input type="radio" name="mode" value="third"><label id="thirdlabel" for="third">3rd line</label>
     </div>
     <button id="extra_button" class="button-g button-6 button-wide" value="extra" onclick="gotoExtra()">Extra</button>
   </div>
@@ -56,6 +57,7 @@
     const FIRST_STR_JA = '1行目';
     const FIRSTPLIS_STR_JA = '1行目*';
     const SECOND_STR_JA = '2行目';
+    const THIRD_STR_JA = '3行目';
     const INTRO_STR_JA = '先頭抽出';
     const CONFIG_STR_JA = '設定';
     const EXIT_STR_JA = '終了';
@@ -67,6 +69,7 @@
     const FIRST_STR_EN = '1st line';
     const FIRSTPLIS_STR_EN = '1 line*';
     const SECOND_STR_EN = '2nd line';
+    const THIRD_STR_EN = '3rd line';
     const INTRO_STR_EN = 'Extra';
     const CONFIG_STR_EN = 'Config';
     const EXIT_STR_EN = 'Exit';
@@ -83,6 +86,7 @@
     const firstDom = document.getElementById('first');
     const firstPlusDom = document.getElementById('firstplus');
     const secondLabelDom = document.getElementById('secondlabel');
+    const thirdLabelDom = document.getElementById('thirdlabel');
     const secondDom = document.getElementById('second');
     const extraDom = document.getElementById('extra');
     const extraButtonDom = document.getElementById('extra_button');
@@ -196,6 +200,7 @@
         firstLabelDom.innerHTML = FIRST_STR_JA;
         firstPlusLabelDom.innerHTML = FIRSTPLIS_STR_JA;
         secondLabelDom.innerHTML = SECOND_STR_JA;
+        thirdLabelDom.innerHTML = THIRD_STR_JA;
         extraDom.innerHTML = INTRO_STR_JA;
         extraButtonDom.innerHTML = INTRO_STR_JA;
         configDom.innerHTML = CONFIG_STR_JA;
@@ -215,6 +220,7 @@
         firstLabelDom.innerHTML = FIRST_STR_EN;
         firstPlusLabelDom.innerHTML = FIRSTPLIS_STR_EN;
         secondLabelDom.innerHTML = SECOND_STR_EN;
+        thirdLabelDom.innerHTML = THIRD_STR_EN;
         extraDom.innerHTML = INTRO_STR_EN;
         extraButtonDom.innerHTML = INTRO_STR_EN;
         configDom.innerHTML = CONFIG_STR_EN;
