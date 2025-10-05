@@ -3,7 +3,7 @@
  *
  * ElTextModifiy
  * function：text modifier
- * updated: 2025/09/14
+ * updated: 2025/10/05
  **/
 
 'use strict';
@@ -36,11 +36,11 @@ export class Modifiy {
     Modifiy.logger.debug('modify: constructed');
   }
 
-  // get first line
-  getFirstLine(str: string, flg: boolean): Promise<string> {
+  // get partial line
+  getPartialLine(str: string, flg: number): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
-        Modifiy.logger.silly('modify: get first line');
+        Modifiy.logger.silly('modify: get partial line');
         // start flg
         let startFlg: boolean = false;
         // final flg
@@ -53,57 +53,32 @@ export class Modifiy {
         const targetArray: string[] = result.slice(0, ARRAY_LENGTH);
         // loop
         for (let i = 0; i < targetArray.length; i++) {
-          // final one
-          if (finalFlg && targetArray[i] != '') {
-            tmpStr = targetArray[i].slice(0, LINE_LENGTH);
-            break;
-          }
-          // start line
-          if (startFlg && targetArray[i] != '') {
-            finalFlg = true;
-          }
+          // empty line
           if (targetArray[i] == '') {
             startFlg = true;
-          }
-        }
-        // complete
-        resolve(tmpStr);
-
-      } catch (e: unknown) {
-        Modifiy.logger.error(e);
-        // reject
-        reject('error');
-      }
-    });
-  }
-
-  // get second line
-  getSecondLine(str: string): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        Modifiy.logger.silly('modify: get second line');
-        // start flg
-        let startFlg: boolean = false;
-        // second flg
-        let secondFlg: boolean = false;
-        // tmp str
-        let tmpStr: string = '';
-        // split
-        const result: string[] = str.split(/\r\n|\n|\r/);
-        // target array
-        const targetArray: string[] = result.slice(0, ARRAY_LENGTH);
-        // loop
-        for (let i = 0; i < targetArray.length; i++) {
-          // seconde one
-          if (secondFlg && targetArray[i] != '') {
-            tmpStr = targetArray[i].slice(0, LINE_LENGTH);
-          }
-          // start line
-          if (startFlg && targetArray[i] != '') {
-            secondFlg = true;
-          }
-          if (targetArray[i] == '') {
-            startFlg = true;
+          } else {
+            // final one
+            if (finalFlg) {
+              tmpStr = targetArray[i].slice(0, LINE_LENGTH);
+              break;
+            }
+            // start line
+            if (startFlg) {
+              // symbol flg
+              if (flg == 0) {
+                tmpStr = targetArray[i].slice(0, LINE_LENGTH);
+                break;
+              } else if (flg == 1) {
+                if (targetArray[i].length < 5) {
+                  continue
+                } else {
+                  tmpStr = targetArray[i].slice(0, LINE_LENGTH);
+                  break;
+                }
+              } else {
+                finalFlg = true
+              }
+            }
           }
         }
         // complete

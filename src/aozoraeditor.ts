@@ -20,7 +20,7 @@ import iconv from 'iconv-lite'; // Text converter
 import extract from 'extract-zip'; // extract zip file
 import Encoding from 'encoding-japanese'; // for encoding
 import NodeCache from "node-cache"; // node-cache
-import { Modifiy } from './class/ElTextModifiy0914'; // modifier
+import { Modifiy } from './class/ElTextModifiy1005'; // modifier
 import ELLogger from './class/ElLogger'; // logger
 import Dialog from './class/ElDialog0721'; // dialog
 import MKDir from './class/ElMkdir0414'; // mdkir
@@ -629,13 +629,13 @@ ipcMain.on('extra', async (_: any, arg: any): Promise<void> => {
               // line
               if (arg == 'first') {
                 // first strings
-                strObj['intro'] = await modifyMaker.getFirstLine(str, false);
+                strObj['intro'] = await modifyMaker.getPartialLine(str, 0);
               } else if (arg == 'firstplus') {
                 // first strings
-                strObj['intro'] = await modifyMaker.getFirstLine(str, true);
+                strObj['intro'] = await modifyMaker.getPartialLine(str, 1);
               } else if (arg == 'second') {
                 // second strings
-                strObj['intro'] = await modifyMaker.getSecondLine(str);
+                strObj['intro'] = await modifyMaker.getPartialLine(str, 2);
               } else {
                 // japanese
                 if (language == 'japanese') {
