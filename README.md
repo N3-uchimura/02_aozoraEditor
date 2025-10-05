@@ -30,6 +30,8 @@ Windows10 ~
    npm start
    ```
 
+- node.js environment required.
+
 ### From exe
 
 1. Download exe file from release.
@@ -45,8 +47,9 @@ Windows10 ~
 - Rename: rename filename to formatted style. out from resources/file/modified to resources/file/renamed.
 - Extra: extract first line from txt file in resources/file/intro and export to desktop as csv file. radio explanation is below.
   - 1st line: extract first text line.
-  - 1st line\*: extract first text line ignoring short line (under 4 char).
+  - 1st line\*: extract first text line ignoring first short line (under 4 char).
   - 2nd line: extract second text line.
+  - 3rd line: extract third text line.
 
 ## Features
 
