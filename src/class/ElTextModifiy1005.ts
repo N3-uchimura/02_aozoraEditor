@@ -203,7 +203,7 @@ export class Modifiy {
       try {
         Modifiy.logger.silly('modify: remove brackets');
         // result
-        resolve(str.replace(/［＃.+?］/g, ''));
+        resolve(str.replace(/［＃.+?］.*?/g, ''));
 
       } catch (e: unknown) {
         Modifiy.logger.error(e);

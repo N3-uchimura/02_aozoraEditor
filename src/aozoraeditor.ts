@@ -23,7 +23,7 @@ import NodeCache from "node-cache"; // node-cache
 import { Modifiy } from './class/ElTextModifiy1005'; // modifier
 import ELLogger from './class/ElLogger'; // logger
 import Dialog from './class/ElDialog0721'; // dialog
-import MKDir from './class/ElMkdir0414'; // mdkir
+import FileManage from './class/ELFileManage1025'; // mdkir
 import CSV from './class/ElCsv0414'; // csvmaker
 
 // log level
@@ -33,7 +33,7 @@ const logger: ELLogger = new ELLogger(myConst.COMPANY_NAME, myConst.APP_NAME, LO
 // dialog instance
 const dialogMaker: Dialog = new Dialog(logger);
 // mkdir instance
-const mkdirManager: any = new MKDir(logger);
+const fileManager: any = new FileManage(logger);
 // modify instance
 const modifyMaker: Modifiy = new Modifiy(logger);
 // cache instance
@@ -163,8 +163,8 @@ app.on('ready', async (): Promise<void> => {
     cacheMaker.set('language', language);
 
     // make dir
-    await mkdirManager.mkDir(baseFilePath);
-    await mkdirManager.mkDirAll([path.join(baseFilePath, 'source'), path.join(baseFilePath, 'tmp'), path.join(baseFilePath, 'renamed'), path.join(baseFilePath, 'modified'), path.join(baseFilePath, 'extracted'), path.join(baseFilePath, 'intro'),]);
+    await fileManager.mkDir(baseFilePath);
+    await fileManager.mkDirAll([path.join(baseFilePath, 'source'), path.join(baseFilePath, 'tmp'), path.join(baseFilePath, 'renamed'), path.join(baseFilePath, 'modified'), path.join(baseFilePath, 'extracted'), path.join(baseFilePath, 'intro'),]);
     // icons
     const icon: Electron.NativeImage = nativeImage.createFromPath(path.join(globalRootPath, 'assets', 'aozora.ico'));
     // tray
@@ -253,24 +253,8 @@ ipcMain.on('extract', async (): Promise<void> => {
       }
     }
     logger.debug('extract: zip exists');
-
-    // txtfile list
-    const tmpTxtFiles: string[] = await readdir(path.join(baseFilePath, 'tmp'));
-    // delete all files
-    await Promise.all(tmpTxtFiles.map((fl: string): Promise<void> => {
-      return new Promise(async (resolve, _) => {
-        try {
-          // txt file path
-          const targetPath: string = path.join(baseFilePath, 'tmp', fl);
-          await unlink(targetPath);
-          // result
-          resolve();
-
-        } catch (err2: unknown) {
-          logger.error(err2);
-        }
-      })
-    }));
+    // delete all
+    await fileManager.rmDir(path.join(baseFilePath, 'tmp'));
     // complete
     logger.debug('ipc: delete tmp files completed.');
 
