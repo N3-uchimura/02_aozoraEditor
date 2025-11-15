@@ -13,7 +13,7 @@ import { myConst, myNums } from './consts/globalvariables';
 /// Modules
 import * as path from 'node:path'; // path
 import { readFileSync, existsSync } from 'node:fs'; // file system
-import { unlink, copyFile, readFile, writeFile, rename, readdir } from 'node:fs/promises'; // file system (Promise)
+import { copyFile, readFile, writeFile, rename, readdir } from 'node:fs/promises'; // file system (Promise)
 import { setTimeout } from 'node:timers/promises'; // wait for seconds
 import { BrowserWindow, app, ipcMain, Tray, Menu, nativeImage } from 'electron'; // electron
 import iconv from 'iconv-lite'; // Text converter

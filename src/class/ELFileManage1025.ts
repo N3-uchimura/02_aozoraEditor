@@ -10,8 +10,8 @@
 
 // define modules
 import * as path from 'node:path'; // path
-import { promises, existsSync } from 'fs'; // file system
-import { unlink, readdir } from 'node:fs/promises'; // file 
+import { promises, existsSync } from 'node:fs'; // file system
+import { unlink, rmdir, readdir } from 'node:fs/promises'; // file 
 // file system definition
 const { mkdir } = promises;
 
@@ -88,32 +88,70 @@ class FileManage {
 
   // rmDir
   rmDir = async (dir: string): Promise<void> => {
-    return new Promise(async (resolve, _) => {
+    return new Promise(async (resolve1, _) => {
       try {
         FileManage.logger.debug('filemanage: rmDir started.');
-        // txtfile list
-        const tmpTxtFiles: string[] = await readdir(dir);
+        // dir not exists
+        if (!existsSync(dir)) {
+          FileManage.logger.debug('filemanage: dir not exists.');
+          resolve1();
+        }
+        // directory list
+        const tmpDirs: string[] = await readdir(dir);
+        // empty
+        if (tmpDirs.length == 0) {
+          FileManage.logger.debug('filemanage: dir is empty.');
+          resolve1();
+        }
         // delete all files
-        await Promise.all(tmpTxtFiles.map((fl: string): Promise<void> => {
-          return new Promise(async (resolve, _) => {
+        await Promise.all(tmpDirs.map((dr: string): Promise<void> => {
+          return new Promise(async (resolve2, _) => {
             try {
               // txt file path
-              const targetPath: string = path.join(dir, fl);
-              await unlink(targetPath);
-              // result
-              resolve();
+              const tmpTxtFiles: string[] = await readdir(path.join(dir, dr));
+              console.log(tmpTxtFiles);
+              // dir not exists
+              if (!existsSync(dir)) {
+                FileManage.logger.silly('filemanage: dir not exists.');
+                resolve2();
+              }
+              // delete all files
+              await Promise.all(tmpTxtFiles.map((file: string): Promise<void> => {
+                return new Promise(async (resolve3, _) => {
+                  try {
+                    // target
+                    const targetFile: string = path.join(dir, dr, file);
+                    // dir not exists
+                    if (!existsSync(targetFile)) {
+                      resolve3();
+                    }
+                    // delete file
+                    await unlink(path.join(dir, dr, file));
+                    // result
+                    resolve3();
 
-            } catch (err2: unknown) {
-              FileManage.logger.error(err2);
+                  } catch (err2: unknown) {
+                    FileManage.logger.error(err2);
+                  }
+                })
+              }));
+              // delete empty dir
+              await rmdir(path.join(dir, dr));
+              resolve2();
+            } catch (err: unknown) {
+              // error
+              FileManage.logger.error(err);
+              resolve2();
             }
-          })
+            FileManage.logger.debug('filemanage: rmDir end.');
+            // result
+            resolve1();
+          });
         }));
-        // result
-        resolve();
       } catch (err: unknown) {
         // error
         FileManage.logger.error(err);
-        resolve();
+        resolve1();
       }
     });
   };
