@@ -39,7 +39,7 @@ Windows10 ~
 
 ## Usage
 
-0. Root Directory is
+0. Default root directory is
 
 - all：「C:\Program Files\aozoraeditor」
 - user：「C:\Users\xxxx\AppData\Local\Programs\aozoraeditor」
