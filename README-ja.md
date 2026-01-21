@@ -45,6 +45,11 @@ Windows10 ~
 
 ## Usage
 
+0. ルートフォルダは
+
+- 全体インストール：「C:\Program Files\aozoraeditor」
+- ユーザインストール：「C:\Users\xxxx\AppData\Local\Programs\aozoraeditor」です。
+
 1. ダウンロードした ZIP ファイルを、「resources/file/source」に入れます。
 2. 以下のボタンを上から順番に押していきます。
 

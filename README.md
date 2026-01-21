@@ -39,6 +39,11 @@ Windows10 ~
 
 ## Usage
 
+0. Root Directory is
+
+- all：「C:\Program Files\aozoraeditor」
+- user：「C:\Users\xxxx\AppData\Local\Programs\aozoraeditor」
+
 1. put zip files into resources/file/source.
 2. Press any buttons.
 
