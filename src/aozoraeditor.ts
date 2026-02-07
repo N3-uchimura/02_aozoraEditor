@@ -240,12 +240,10 @@ ipcMain.on("beforeready", async (event: any, __): Promise<void> => {
 ipcMain.on('open', async (_: any, __: any): Promise<void> => {
   try {
     logger.info('app: open dir');
-    // set path
-    const path: string = globalRootPath;
     // switch on OS
-    const command = process.platform === 'win32' ? `explorer "${path}"` :
-      process.platform === 'darwin' ? `open "${path}"` :
-        `xdg-open "${path}"`;
+    const command = process.platform === 'win32' ? `explorer "${baseFilePath}"` :
+      process.platform === 'darwin' ? `open "${baseFilePath}"` :
+        `xdg-open "${baseFilePath}"`;
     // open root dir
     exec(command);
 
