@@ -13,8 +13,9 @@ import { myConst, myNums } from './consts/globalvariables';
 /// Modules
 import * as path from 'node:path'; // path
 import { readFileSync, existsSync } from 'node:fs'; // file system
-import { copyFile, readFile, writeFile, rename, readdir } from 'node:fs/promises'; // file system (Promise)
+import { copyFile, readFile, writeFile, rename, readdir } from 'node:fs/promises'; // promise fs
 import { setTimeout } from 'node:timers/promises'; // wait for seconds
+import { exec } from 'child_process'; // child process
 import { BrowserWindow, app, ipcMain, Tray, Menu, nativeImage } from 'electron'; // electron
 import iconv from 'iconv-lite'; // Text converter
 import extract from 'extract-zip'; // extract zip file
@@ -166,7 +167,7 @@ app.on('ready', async (): Promise<void> => {
     await fileManager.mkDir(baseFilePath);
     await fileManager.mkDirAll([path.join(baseFilePath, 'source'), path.join(baseFilePath, 'tmp'), path.join(baseFilePath, 'renamed'), path.join(baseFilePath, 'modified'), path.join(baseFilePath, 'extracted'), path.join(baseFilePath, 'intro'),]);
     // icons
-    const icon: Electron.NativeImage = nativeImage.createFromPath(path.join(globalRootPath, 'assets', 'aozora.ico'));
+    const icon: Electron.NativeImage = nativeImage.createFromPath(path.join(globalRootPath, 'assets', 'aozoraedit.ico'));
     // tray
     const mainTray: Electron.Tray = new Tray(icon);
     // context menu
@@ -233,6 +234,29 @@ ipcMain.on("beforeready", async (event: any, __): Promise<void> => {
   const language: string = cacheMaker.get('language') ?? '';
   // be ready
   event.sender.send("ready", language);
+});
+
+// open
+ipcMain.on('open', async (_: any, __: any): Promise<void> => {
+  try {
+    logger.info('app: open dir');
+    // set path
+    const path: string = globalRootPath;
+    // switch on OS
+    const command = process.platform === 'win32' ? `explorer "${path}"` :
+      process.platform === 'darwin' ? `open "${path}"` :
+        `xdg-open "${path}"`;
+    // open root dir
+    exec(command);
+
+  } catch (e: unknown) {
+    logger.error(e);
+    // error
+    if (e instanceof Error) {
+      // error message
+      dialogMaker.showmessage('error', e.message);
+    }
+  }
 });
 
 // extract

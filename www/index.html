@@ -12,6 +12,10 @@
 <body>
   <h1 id="maintitle">Aozora Editor</h1>
   <div class="operation_area">
+      <button id="open_button" class="button-g button-6 button-wide" value="open"
+        onclick="gotoOpen()">Open</button>
+    </div>
+  <div class="operation_area">
     <h3 id="extract">Extract</h3>
     <button id="extract_button" class="button-g button-wide" value="extract" onclick="gotoExtract()">Extract</button>
   </div>
@@ -51,6 +55,7 @@
     /// constants
     // japanese
     const APPNAME_STR_JA = '青空エディタ';
+    const OPENDIR_STR_JA = 'フォルダ開く';
     const EXTRACT_STR_JA = 'ZIP解凍';
     const MODIFY_STR_JA = 'TXT修正';
     const RENAME_STR_JA = 'リネーム';
@@ -63,6 +68,7 @@
     const EXIT_STR_JA = '終了';
     // english
     const APPNAME_STR_EN = 'Aozora Scraper';
+    const OPENDIR_STR_EN = 'OpenDir';
     const EXTRACT_STR_EN = 'Extract';
     const MODIFY_STR_EN = 'Modify';
     const RENAME_STR_EN = 'Rename';
@@ -88,6 +94,7 @@
     const secondLabelDom = document.getElementById('secondlabel');
     const thirdLabelDom = document.getElementById('thirdlabel');
     const secondDom = document.getElementById('second');
+    const opendirButtonDom = document.getElementById('open_button');
     const extraDom = document.getElementById('extra');
     const extraButtonDom = document.getElementById('extra_button');
     const configDom = document.getElementById('config');
@@ -159,6 +166,18 @@
       }
     }
 
+    // goto open dir
+    const gotoOpen = () => {
+      try {
+        // scrape
+        window.api.send('open');
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    }
+
     // goto config page
     const gotoConfig = () => {
       try {
@@ -201,6 +220,7 @@
         firstPlusLabelDom.innerHTML = FIRSTPLIS_STR_JA;
         secondLabelDom.innerHTML = SECOND_STR_JA;
         thirdLabelDom.innerHTML = THIRD_STR_JA;
+        opendirButtonDom.innerHTML = OPENDIR_STR_JA;
         extraDom.innerHTML = INTRO_STR_JA;
         extraButtonDom.innerHTML = INTRO_STR_JA;
         configDom.innerHTML = CONFIG_STR_JA;
@@ -221,6 +241,7 @@
         firstPlusLabelDom.innerHTML = FIRSTPLIS_STR_EN;
         secondLabelDom.innerHTML = SECOND_STR_EN;
         thirdLabelDom.innerHTML = THIRD_STR_EN;
+        opendirButtonDom.innerHTML = OPENDIR_STR_EN;
         extraDom.innerHTML = INTRO_STR_EN;
         extraButtonDom.innerHTML = INTRO_STR_EN;
         configDom.innerHTML = CONFIG_STR_EN;

@@ -1,8 +1,8 @@
 {
   "name": "aozora-editor",
   "productName": "aozoraeditor",
-  "version": "1.3.5-alpha.1",
-  "description": "application for aozoraeditor",
+  "version": "1.3.5",
+  "description": "Electron application for aozoraeditor",
   "main": "build/aozoraeditor.js",
   "scripts": {
     "build": "tsc && chcp 65001",
@@ -32,7 +32,8 @@
   "devDependencies": {
     "@types/encoding-japanese": "^2.2.1",
     "@types/node": "^20.19.9",
-    "electron": "^38.1.0"
+    "electron": "^38.1.0",
+    "electron-builder": "^26.7.0"
   },
   "build": {
     "appId": "net.numthree.aozoraeditor",
@@ -56,7 +57,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/aozora.png"
+      "icon": "assets/aozoraedit.png"
     },
     "nsis": {
       "oneClick": false,
