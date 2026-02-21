@@ -41,16 +41,16 @@ Windows10 ~
 
 0. Press "OpenDir" and resouces directory below will be opened.
 
-- all：「C:\Program Files\aozoraeditor」
-- user：「C:\Users\xxxx\AppData\Local\Programs\aozoraeditor」
+- all：「C:\Program Files\aozoraeditor\resources\file」
+- user：「C:\Users\xxxx\AppData\Local\Programs\aozoraeditor\resources\file」
 
-1. put zip files into resources/file/source.
+1. put zip files into resources\file\source.
 2. Press any buttons.
 
-- Extract: extract zip to txt. out from resources/file/source to resources/file/extracted.
-- Modify: modify unnecessary text and old character to new one. from resources/file/extracted out to resources/file/modified.
-- Rename: rename filename to formatted style. out from resources/file/modified to resources/file/renamed.
-- Extra: extract first line from txt file in resources/file/intro and export to desktop as csv file. radio explanation is below.
+- Extract: extract zip to txt. out from resources\file\source to resources\file\extracted.
+- Modify: modify unnecessary text and old character to new one. from resources\file\extracted out to resources\file\modified.
+- Rename: rename filename to formatted style. out from resources\file\modified to resources\file\renamed.
+- Extra: extract first line from txt file in resources\file\intro and export to desktop as csv file. radio explanation is below.
   - 1st line: extract first text line.
   - 1st line\*: extract first text line ignoring first short line (under 4 char).
   - 2nd line: extract second text line.

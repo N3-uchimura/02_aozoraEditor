@@ -35,15 +35,17 @@ class FileManage {
         if (!existsSync(dir)) {
           // make dir
           await mkdir(dir);
-
           FileManage.logger.debug('filemanage: mkdir completed.');
         } else {
           FileManage.logger.debug('already exists.');
         }
+        // finish
         resolve();
+
       } catch (err: unknown) {
         // error
         FileManage.logger.error(err);
+        // finish
         resolve();
       }
     });
@@ -63,18 +65,19 @@ class FileManage {
                 if (!existsSync(dir)) {
                   // make dir
                   await mkdir(dir);
+                  // finish
                   resolve2();
                 } else {
                   // error
                   throw Error('already exists.');
                 }
               } catch (err: unknown) {
-                // error
+                // finish
                 resolve2();
               }
             });
           })
-        ).then(() => resolve1());
+        ).then(() => resolve1()); // finish
         FileManage.logger.debug('filemanage: mkDirAll started.');
 
         // make dir
@@ -94,6 +97,7 @@ class FileManage {
         // dir not exists
         if (!existsSync(dir)) {
           FileManage.logger.debug('filemanage: dir not exists.');
+          // finish
           resolve1();
         }
         // directory list
@@ -101,6 +105,7 @@ class FileManage {
         // empty
         if (tmpDirs.length == 0) {
           FileManage.logger.debug('filemanage: dir is empty.');
+          // finish
           resolve1();
         }
         // delete all files
@@ -109,10 +114,10 @@ class FileManage {
             try {
               // txt file path
               const tmpTxtFiles: string[] = await readdir(path.join(dir, dr));
-              console.log(tmpTxtFiles);
               // dir not exists
               if (!existsSync(dir)) {
                 FileManage.logger.silly('filemanage: dir not exists.');
+                // finish
                 resolve2();
               }
               // delete all files
@@ -123,11 +128,12 @@ class FileManage {
                     const targetFile: string = path.join(dir, dr, file);
                     // dir not exists
                     if (!existsSync(targetFile)) {
+                      // finish
                       resolve3();
                     }
                     // delete file
                     await unlink(path.join(dir, dr, file));
-                    // result
+                    // finish
                     resolve3();
 
                   } catch (err2: unknown) {
@@ -137,7 +143,9 @@ class FileManage {
               }));
               // delete empty dir
               await rmdir(path.join(dir, dr));
+              // finish
               resolve2();
+
             } catch (err: unknown) {
               // error
               FileManage.logger.error(err);
@@ -148,6 +156,7 @@ class FileManage {
             resolve1();
           });
         }));
+        
       } catch (err: unknown) {
         // error
         FileManage.logger.error(err);

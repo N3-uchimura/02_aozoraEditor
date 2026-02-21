@@ -23,9 +23,9 @@ import Encoding from 'encoding-japanese'; // for encoding
 import NodeCache from "node-cache"; // node-cache
 import { Modifiy } from './class/ElTextModifiy1005'; // modifier
 import ELLogger from './class/ElLogger'; // logger
-import Dialog from './class/ElDialog0721'; // dialog
+import Dialog from './class/ElDialog1124'; // dialog
 import FileManage from './class/ELFileManage1025'; // mdkir
-import CSV from './class/ElCsv0414'; // csvmaker
+import CSV from './class/ElCsv0126'; // csvmaker
 
 // log level
 const LOG_LEVEL: string = myConst.LOG_LEVEL ?? 'all';
