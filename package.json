@@ -2,7 +2,7 @@
   "name": "aozora-editor",
   "productName": "aozoraeditor",
   "version": "1.3.6-alpha1",
-  "description": "Electron application for aozoraeditor",
+  "description": "application for editing aozora bunko txts",
   "main": "build/aozoraeditor.js",
   "scripts": {
     "build": "tsc && chcp 65001",
