@@ -13,15 +13,22 @@ import { myConst, myNums } from './consts/globalvariables';
 /// Modules
 import * as path from 'node:path'; // path
 import { readFileSync, existsSync } from 'node:fs'; // file system
-import { copyFile, readFile, writeFile, rename, readdir } from 'node:fs/promises'; // promise fs
+import {
+  copyFile,
+  readFile,
+  writeFile,
+  rename,
+  readdir,
+  unlink,
+} from 'node:fs/promises'; // promise fs
 import { setTimeout } from 'node:timers/promises'; // wait for seconds
 import { exec } from 'child_process'; // child process
 import { BrowserWindow, app, ipcMain, Tray, Menu, nativeImage } from 'electron'; // electron
 import iconv from 'iconv-lite'; // Text converter
 import extract from 'extract-zip'; // extract zip file
 import Encoding from 'encoding-japanese'; // for encoding
-import NodeCache from "node-cache"; // node-cache
-import { Modifiy } from './class/ElTextModifiy1005'; // modifier
+import NodeCache from 'node-cache'; // node-cache
+import { Modifiy } from './class/ElTextModifiy0328'; // modifier
 import ELLogger from './class/ElLogger'; // logger
 import Dialog from './class/ElDialog1124'; // dialog
 import FileManage from './class/ELFileManage1025'; // mdkir
@@ -30,7 +37,11 @@ import CSV from './class/ElCsv0126'; // csvmaker
 // log level
 const LOG_LEVEL: string = myConst.LOG_LEVEL ?? 'all';
 // loggeer instance
-const logger: ELLogger = new ELLogger(myConst.COMPANY_NAME, myConst.APP_NAME, LOG_LEVEL);
+const logger: ELLogger = new ELLogger(
+  myConst.COMPANY_NAME,
+  myConst.APP_NAME,
+  LOG_LEVEL,
+);
 // dialog instance
 const dialogMaker: Dialog = new Dialog(logger);
 // mkdir instance
@@ -85,9 +96,9 @@ const createWindow = (): void => {
       webPreferences: {
         nodeIntegration: false, // node
         contextIsolation: true, // isolate
-        preload: path.join(__dirname, "preload.js"), // preload
-      }
-    }
+        preload: path.join(__dirname, 'preload.js'), // preload
+      },
+    };
     // Electron window
     mainWindow = new BrowserWindow(windowOptions);
     // hide menubar
@@ -118,11 +129,10 @@ const createWindow = (): void => {
       // destroy window
       mainWindow.destroy();
     });
-
   } catch (e: unknown) {
     logger.error(e);
   }
-}
+};
 
 // enable sandbox
 app.enableSandbox();
@@ -138,7 +148,11 @@ app.on('ready', async (): Promise<void> => {
     // close label
     let closeLabel: string = '';
     // txt path
-    const languageTxtPath: string = path.join(globalRootPath, 'assets', 'language.txt');
+    const languageTxtPath: string = path.join(
+      globalRootPath,
+      'assets',
+      'language.txt',
+    );
     // not exists
     if (!existsSync(languageTxtPath)) {
       logger.debug('app: making txt ...');
@@ -165,9 +179,19 @@ app.on('ready', async (): Promise<void> => {
 
     // make dir
     await fileManager.mkDir(baseFilePath);
-    await fileManager.mkDirAll([path.join(baseFilePath, 'source'), path.join(baseFilePath, 'tmp'), path.join(baseFilePath, 'renamed'), path.join(baseFilePath, 'modified'), path.join(baseFilePath, 'extracted'), path.join(baseFilePath, 'intro'),]);
+    await fileManager.mkDirAll([
+      path.join(baseFilePath, 'source'),
+      path.join(baseFilePath, 'tmp'),
+      path.join(baseFilePath, 'renamed'),
+      path.join(baseFilePath, 'modified'),
+      path.join(baseFilePath, 'extracted'),
+      path.join(baseFilePath, 'intro'),
+      path.join(baseFilePath, 'splitted'),
+    ]);
     // icons
-    const icon: Electron.NativeImage = nativeImage.createFromPath(path.join(globalRootPath, 'assets', 'aozoraedit.ico'));
+    const icon: Electron.NativeImage = nativeImage.createFromPath(
+      path.join(globalRootPath, 'assets', 'aozoraedit.ico'),
+    );
     // tray
     const mainTray: Electron.Tray = new Tray(icon);
     // context menu
@@ -177,21 +201,20 @@ app.on('ready', async (): Promise<void> => {
         label: displayLabel,
         click: () => {
           mainWindow.show();
-        }
+        },
       },
       // close
       {
         label: closeLabel,
         click: () => {
           app.quit();
-        }
-      }
+        },
+      },
     ]);
     // context menu
     mainTray.setContextMenu(contextMenu);
     // Wclick reopen
     mainTray.on('double-click', () => mainWindow.show());
-
   } catch (e: unknown) {
     logger.error(e);
     // error
@@ -228,12 +251,12 @@ app.on('window-all-closed', (): void => {
  IPC
 */
 // ready
-ipcMain.on("beforeready", async (event: any, __): Promise<void> => {
-  logger.info("app: beforeready app");
+ipcMain.on('beforeready', async (event: any, __): Promise<void> => {
+  logger.info('app: beforeready app');
   // language
   const language: string = cacheMaker.get('language') ?? '';
   // be ready
-  event.sender.send("ready", language);
+  event.sender.send('ready', language);
 });
 
 // open
@@ -241,12 +264,14 @@ ipcMain.on('open', async (_: any, __: any): Promise<void> => {
   try {
     logger.info('app: open dir');
     // switch on OS
-    const command = process.platform === 'win32' ? `explorer "${baseFilePath}"` :
-      process.platform === 'darwin' ? `open "${baseFilePath}"` :
-        `xdg-open "${baseFilePath}"`;
+    const command =
+      process.platform === 'win32'
+        ? `explorer "${baseFilePath}"`
+        : process.platform === 'darwin'
+          ? `open "${baseFilePath}"`
+          : `xdg-open "${baseFilePath}"`;
     // open root dir
     exec(command);
-
   } catch (e: unknown) {
     logger.error(e);
     // error
@@ -281,57 +306,62 @@ ipcMain.on('extract', async (): Promise<void> => {
     logger.debug('ipc: delete tmp files completed.');
 
     // extract files
-    await Promise.all(zipFiles.map((fl: string): Promise<void> => {
-      return new Promise(async (resolve, _) => {
-        try {
-          // zip file path
-          const zipPath: string = path.join(baseFilePath, 'source', fl);
-          // txt file path
-          const targetPath: string = path.join(baseFilePath, 'tmp');
-          await extract(zipPath, { dir: targetPath });
-          resolve();
-
-        } catch (err: unknown) {
-          logger.error(err);
-        }
-      })
-    }));
+    await Promise.all(
+      zipFiles.map((fl: string): Promise<void> => {
+        return new Promise(async (resolve, _) => {
+          try {
+            // zip file path
+            const zipPath: string = path.join(baseFilePath, 'source', fl);
+            // txt file path
+            const targetPath: string = path.join(baseFilePath, 'tmp');
+            await extract(zipPath, { dir: targetPath });
+            resolve();
+          } catch (err: unknown) {
+            logger.error(err);
+          }
+        });
+      }),
+    );
     logger.debug('extract: all zip extracted');
 
     // txtfile list
     const txtFiles: string[] = await readdir(path.join(baseFilePath, 'tmp'));
     // loop file
-    await Promise.all(txtFiles.map((fl: string): Promise<void> => {
-      return new Promise(async (resolve, _) => {
-        try {
-          // file path
-          const filePath: string = path.join(baseFilePath, 'tmp', fl);
-          // file name
-          const filename: string = path.basename(filePath)
-          // extension
-          const extension: string = path.extname(filePath);
-          // when txt
-          if (extension == '.txt') {
-            // output path
-            const outPath: string = path.join(baseFilePath, 'extracted', filename);
-            // not exists
-            if (!existsSync(outPath)) {
-              // copy
-              await copyFile(filePath, outPath,);
+    await Promise.all(
+      txtFiles.map((fl: string): Promise<void> => {
+        return new Promise(async (resolve, _) => {
+          try {
+            // file path
+            const filePath: string = path.join(baseFilePath, 'tmp', fl);
+            // file name
+            const filename: string = path.basename(filePath);
+            // extension
+            const extension: string = path.extname(filePath);
+            // when txt
+            if (extension == '.txt') {
+              // output path
+              const outPath: string = path.join(
+                baseFilePath,
+                'extracted',
+                filename,
+              );
+              // not exists
+              if (!existsSync(outPath)) {
+                // copy
+                await copyFile(filePath, outPath);
+              }
             }
+            // complete
+            resolve();
+          } catch (err: unknown) {
+            logger.error(err);
           }
-          // complete
-          resolve();
-
-        } catch (err: unknown) {
-          logger.error(err);
-        }
-      });
-    }));
+        });
+      }),
+    );
     // complete
     logger.info('ipc: extract completed.');
     dialogMaker.showmessage('info', 'extract completed.');
-
   } catch (e: unknown) {
     logger.error(e);
     // error
@@ -362,82 +392,99 @@ ipcMain.on('modify', async (): Promise<void> => {
     logger.debug('modify: txt exists');
 
     // loop for files
-    await Promise.all(files.map((fl: string): Promise<void> => {
-      return new Promise(async (resolve, _) => {
-        try {
-          // filepath
-          const filePath: string = path.join(baseFilePath, 'extracted', fl);
+    await Promise.all(
+      files.map((fl: string): Promise<void> => {
+        return new Promise(async (resolve, _) => {
+          try {
+            // filepath
+            const filePath: string = path.join(baseFilePath, 'extracted', fl);
 
-          // not exists
-          if (existsSync(filePath)) {
-            // read files
-            const txtdata: any = await readFile(filePath);
-            // detect charcode
-            const detectedEncoding: string | boolean = Encoding.detect(txtdata);
-            logger.debug('charcode: ' + detectedEncoding);
-            // without string
-            if (typeof (detectedEncoding) !== 'string') {
-              // japanese
-              if (language == 'japanese') {
-                throw new Error('エンコーディングエラー');
+            // not exists
+            if (existsSync(filePath)) {
+              // read files
+              const txtdata: any = await readFile(filePath);
+              // detect charcode
+              const detectedEncoding: string | boolean =
+                Encoding.detect(txtdata);
+              logger.debug('charcode: ' + detectedEncoding);
+              // without string
+              if (typeof detectedEncoding !== 'string') {
+                // japanese
+                if (language == 'japanese') {
+                  throw new Error('エンコーディングエラー');
+                } else {
+                  throw new Error('error-encoding');
+                }
+              }
+              // decode
+              const str: string = iconv.decode(txtdata, detectedEncoding);
+              logger.debug('char decoding finished.');
+              // repeat strings
+              const removedStr0: string =
+                await modifyMaker.repeatCharacter(str);
+              logger.debug('0: finished');
+              // annotations
+              const removedStr1: any =
+                await modifyMaker.removeAnnotation(removedStr0);
+              logger.debug('1: finished');
+              // remove footer
+              const removedStr2: string = await modifyMaker.removeFooter(
+                removedStr1.body,
+              );
+              logger.debug('2: finished');
+              // remove ryby(《》)
+              const removedStr3: string =
+                await modifyMaker.removeRuby(removedStr2);
+              logger.debug('3: finished');
+              // remove angle bracket([])
+              const removedStr4: string =
+                await modifyMaker.removeBrackets(removedStr3);
+              logger.debug('4: finished');
+              // remove unnecessary string
+              const removedStr5: string =
+                await modifyMaker.removeSymbols(removedStr4);
+              logger.debug('5: finished');
+              // exchange kanji
+              const removedStr6: string = await modifyMaker.replaceOldToNew(
+                removedStr5,
+                1,
+              );
+              logger.debug('6: finished');
+              // exchange kana
+              const removedStr7: string = await modifyMaker.replaceOldToNew(
+                removedStr6,
+                2,
+              );
+              logger.debug('7: finished');
+              // exchange small
+              const removedStr8: string = await modifyMaker.replaceOldToNew(
+                removedStr7,
+                3,
+              );
+              logger.debug('8: finished');
+              // filepath output
+              const outPath: string = path.join(baseFilePath, 'modified', fl);
+              // header none
+              if (removedStr1.header == undefined) {
+                // write out to file
+                await writeFile(outPath, removedStr8);
               } else {
-                throw new Error('error-encoding');
+                // write out to file
+                await writeFile(outPath, removedStr1.header + removedStr8);
               }
             }
-            // decode
-            const str: string = iconv.decode(txtdata, detectedEncoding);
-            logger.debug('char decoding finished.');
-            // repeat strings
-            const removedStr0: string = await modifyMaker.repeatCharacter(str);
-            logger.debug('0: finished');
-            // annotations
-            const removedStr1: any = await modifyMaker.removeAnnotation(removedStr0);
-            logger.debug('1: finished');
-            // remove footer
-            const removedStr2: string = await modifyMaker.removeFooter(removedStr1.body);
-            logger.debug('2: finished');
-            // remove ryby(《》)
-            const removedStr3: string = await modifyMaker.removeRuby(removedStr2);
-            logger.debug('3: finished');
-            // remove angle bracket([])
-            const removedStr4: string = await modifyMaker.removeBrackets(removedStr3);
-            logger.debug('4: finished');
-            // remove unnecessary string
-            const removedStr5: string = await modifyMaker.removeSymbols(removedStr4);
-            logger.debug('5: finished');
-            // exchange kanji
-            const removedStr6: string = await modifyMaker.replaceOldToNew(removedStr5, 1);
-            logger.debug('6: finished');
-            // exchange kana
-            const removedStr7: string = await modifyMaker.replaceOldToNew(removedStr6, 2);
-            logger.debug('7: finished');
-            // exchange small
-            const removedStr8: string = await modifyMaker.replaceOldToNew(removedStr7, 3);
-            logger.debug('8: finished');
-            // filepath output
-            const outPath: string = path.join(baseFilePath, 'modified', fl);
-            // header none
-            if (removedStr1.header == undefined) {
-              // write out to file
-              await writeFile(outPath, removedStr8);
-            } else {
-              // write out to file
-              await writeFile(outPath, removedStr1.header + removedStr8);
-            }
+            logger.info('writing finished.');
+            resolve();
+          } catch (err: unknown) {
+            // error
+            logger.error(err);
           }
-          logger.info('writing finished.');
-          resolve();
-
-        } catch (err: unknown) {
-          // error
-          logger.error(err);
-        }
-      })
-    }));
+        });
+      }),
+    );
     // complete
     logger.info('ipc: modify completed');
     dialogMaker.showmessage('info', 'modify completed.');
-
   } catch (e: unknown) {
     // error
     logger.error(e);
@@ -467,99 +514,109 @@ ipcMain.on('rename', async (): Promise<void> => {
       }
     }
     // promise
-    await Promise.all(files.map((fl: string, idx: number): Promise<void> => {
-      return new Promise(async (resolve1, reject1) => {
-        try {
-          // file name
-          let newFileName: string = '';
-          // renamed path
-          const rootFilePath: string = path.join(baseFilePath, 'modified');
-          // file path
-          const filePath: string = path.join(rootFilePath, fl);
-          // renamed path
-          const renamePath: string = path.join(baseFilePath, 'renamed');
-          // file reading
-          const txtdata: Buffer = readFileSync(filePath);
-          // char encode
-          const detectedEncoding: string | boolean = Encoding.detect(txtdata);
-          logger.silly('rename: ' + detectedEncoding);
-          // if not string
-          if (typeof (detectedEncoding) !== 'string') {
-            throw new Error('error-encoding');
-          }
-          // char decode
-          const str: string = iconv.decode(txtdata, detectedEncoding);
-          logger.silly('rename: char decoding finished.');
-          // wait for 1sec
-          await setTimeout(1000);
-          // split on \r\n
-          const strArray: string[] = str.split(/\r\n/);
-          // title
-          const titleStr: string = strArray[0];
-          // subtitle
-          const subTitleStr: string = strArray[1];
-          // author
-          const authorStr: string = strArray[2];
-          // index
-          const paddedIndex: string = (idx).toString().padStart(5, '0');
-
-          if (!authorStr) {
-            // filename
-            newFileName = `${paddedIndex}_${titleStr}_${subTitleStr}.txt`;
-
-          } else {
-            // filename
-            newFileName = `${paddedIndex}_${titleStr}_${subTitleStr}_${authorStr}.txt`;
-          }
-
-          // prohibit symbol
-          const notSymbol: string[] = ['\\', '/', ':', '*', '?', '"', '<', '>', '|'];
-
-          // tmp
-          let tmpStr: string = '';
-
-          // loop
-          await Promise.all(notSymbol.map((symb: string): Promise<void> => {
-            return new Promise(async (resolve2, _) => {
-              try {
-                // tmp
-                tmpStr = path.join(renamePath, newFileName);
-
-                // include symbol
-                if (newFileName.includes(symb)) {
-                  tmpStr = tmpStr.replace(symb, '');
-                }
-                // result
-                resolve2();
-
-              } catch (error: unknown) {
-                logger.error(error);
-              }
-            });
-          }));
-
-          if (tmpStr.length < 255) {
-            // rename
-            await rename(filePath, tmpStr);
+    await Promise.all(
+      files.map((fl: string, idx: number): Promise<void> => {
+        return new Promise(async (resolve1, reject1) => {
+          try {
+            // file name
+            let newFileName: string = '';
+            // renamed path
+            const rootFilePath: string = path.join(baseFilePath, 'modified');
+            // file path
+            const filePath: string = path.join(rootFilePath, fl);
+            // renamed path
+            const renamePath: string = path.join(baseFilePath, 'renamed');
+            // file reading
+            const txtdata: Buffer = readFileSync(filePath);
+            // char encode
+            const detectedEncoding: string | boolean = Encoding.detect(txtdata);
+            logger.silly('rename: ' + detectedEncoding);
+            // if not string
+            if (typeof detectedEncoding !== 'string') {
+              throw new Error('error-encoding');
+            }
+            // char decode
+            const str: string = iconv.decode(txtdata, detectedEncoding);
+            logger.silly('rename: char decoding finished.');
             // wait for 1sec
             await setTimeout(1000);
+            // split on \r\n
+            const strArray: string[] = str.split(/\r\n/);
+            // title
+            const titleStr: string = strArray[0];
+            // subtitle
+            const subTitleStr: string = strArray[1];
+            // author
+            const authorStr: string = strArray[2];
+            // index
+            const paddedIndex: string = idx.toString().padStart(5, '0');
 
-            // result
-            resolve1();
-          } else {
-            reject1();
+            if (!authorStr) {
+              // filename
+              newFileName = `${paddedIndex}_${titleStr}_${subTitleStr}.txt`;
+            } else {
+              // filename
+              newFileName = `${paddedIndex}_${titleStr}_${subTitleStr}_${authorStr}.txt`;
+            }
+
+            // prohibit symbol
+            const notSymbol: string[] = [
+              '\\',
+              '/',
+              ':',
+              '*',
+              '?',
+              '"',
+              '<',
+              '>',
+              '|',
+            ];
+
+            // tmp
+            let tmpStr: string = '';
+
+            // loop
+            await Promise.all(
+              notSymbol.map((symb: string): Promise<void> => {
+                return new Promise(async (resolve2, _) => {
+                  try {
+                    // tmp
+                    tmpStr = path.join(renamePath, newFileName);
+
+                    // include symbol
+                    if (newFileName.includes(symb)) {
+                      tmpStr = tmpStr.replace(symb, '');
+                    }
+                    // result
+                    resolve2();
+                  } catch (error: unknown) {
+                    logger.error(error);
+                  }
+                });
+              }),
+            );
+
+            if (tmpStr.length < 255) {
+              // rename
+              await rename(filePath, tmpStr);
+              // wait for 1sec
+              await setTimeout(1000);
+
+              // result
+              resolve1();
+            } else {
+              reject1();
+            }
+          } catch (err: unknown) {
+            logger.error(err);
           }
-
-        } catch (err: unknown) {
-          logger.error(err);
-        }
-      });
-    }));
+        });
+      }),
+    );
     // result
     logger.info('ipc rename finished.');
     // end message
     dialogMaker.showmessage('info', 'rename completed.');
-
   } catch (e: unknown) {
     logger.error(e);
     // error
@@ -579,7 +636,9 @@ ipcMain.on('extra', async (_: any, arg: any): Promise<void> => {
     // language
     const language: any = cacheMaker.get('language') ?? 'japanese';
     // file list
-    const sourceFiles: string[] = await readdir(path.join(baseFilePath, 'intro'));
+    const sourceFiles: string[] = await readdir(
+      path.join(baseFilePath, 'intro'),
+    );
     // if empty
     if (sourceFiles.length == 0) {
       // japanese
@@ -596,80 +655,85 @@ ipcMain.on('extra', async (_: any, arg: any): Promise<void> => {
 
     for (const files of finalTxtFiles) {
       // loop for files
-      await Promise.allSettled(files.map((fl: string): Promise<void> => {
-        return new Promise(async (resolve, _) => {
-          try {
-            logger.debug('extra: ' + fl);
-            // str header
-            let strObj: { [key: string]: string } = {
-              filename: '',
-              intro: '',
-            };
-            // filepath
-            const filePath: string = path.join(baseFilePath, 'intro', fl);
+      await Promise.allSettled(
+        files.map((fl: string): Promise<void> => {
+          return new Promise(async (resolve, _) => {
+            try {
+              logger.debug('extra: ' + fl);
+              // str header
+              let strObj: { [key: string]: string } = {
+                filename: '',
+                intro: '',
+              };
+              // filepath
+              const filePath: string = path.join(baseFilePath, 'intro', fl);
 
-            // not exists
-            if (existsSync(filePath)) {
-              // read files
-              const txtdata: any = await readFile(filePath);
-              // detect charcode
-              let detectedEncoding: string | boolean = Encoding.detect(txtdata);
-              logger.silly('extra: ' + detectedEncoding);
-              // without string
-              if (typeof (detectedEncoding) !== 'string') {
-                // japanese
-                if (language == 'japanese') {
-                  logger.error('エンコーディングエラー');
-                  detectedEncoding = myConst.CSV_ENCODING;
-                } else {
-                  logger.error('error-encoding');
+              // not exists
+              if (existsSync(filePath)) {
+                // read files
+                const txtdata: any = await readFile(filePath);
+                // detect charcode
+                let detectedEncoding: string | boolean =
+                  Encoding.detect(txtdata);
+                logger.silly('extra: ' + detectedEncoding);
+                // without string
+                if (typeof detectedEncoding !== 'string') {
+                  // japanese
+                  if (language == 'japanese') {
+                    logger.error('エンコーディングエラー');
+                    detectedEncoding = myConst.CSV_ENCODING;
+                  } else {
+                    logger.error('error-encoding');
+                    detectedEncoding = myConst.DEFAULT_ENCODING;
+                  }
+                } else if (detectedEncoding == 'UNICODE') {
                   detectedEncoding = myConst.DEFAULT_ENCODING;
                 }
-              } else if (detectedEncoding == 'UNICODE') {
-                detectedEncoding = myConst.DEFAULT_ENCODING;
-              }
-              // decode
-              const str: string = iconv.decode(txtdata, detectedEncoding);
-              logger.silly('extra: char decoding finished.');
-              // line
-              if (arg == 'first') {
-                // first strings
-                strObj['intro'] = await modifyMaker.getPartialLine(str, 0);
-              } else if (arg == 'firstplus') {
-                // first strings
-                strObj['intro'] = await modifyMaker.getPartialLine(str, 1);
-              } else if (arg == 'second') {
-                // second strings
-                strObj['intro'] = await modifyMaker.getPartialLine(str, 2);
-              } else if (arg == 'third') {
-                // third strings
-                strObj['intro'] = await modifyMaker.getPartialLine(str, 3);
-              } else {
-                // japanese
-                if (language == 'japanese') {
-                  throw new Error('不正なリクエストです');
+                // decode
+                const str: string = iconv.decode(txtdata, detectedEncoding);
+                logger.silly('extra: char decoding finished.');
+                // line
+                if (arg == 'first') {
+                  // first strings
+                  strObj['intro'] = await modifyMaker.getPartialLine(str, 0);
+                } else if (arg == 'firstplus') {
+                  // first strings
+                  strObj['intro'] = await modifyMaker.getPartialLine(str, 1);
+                } else if (arg == 'second') {
+                  // second strings
+                  strObj['intro'] = await modifyMaker.getPartialLine(str, 2);
+                } else if (arg == 'third') {
+                  // third strings
+                  strObj['intro'] = await modifyMaker.getPartialLine(str, 3);
                 } else {
-                  throw new Error('bad request.');
+                  // japanese
+                  if (language == 'japanese') {
+                    throw new Error('不正なリクエストです');
+                  } else {
+                    throw new Error('bad request.');
+                  }
                 }
+                // get into array
+                strObj['filename'] = fl;
+                logger.silly('extra: finished');
+                // finish
+                finalArray.push(strObj);
               }
-              // get into array
-              strObj['filename'] = fl;
-              logger.silly('extra: finished');
-              // finish
-              finalArray.push(strObj);
+              resolve();
+              logger.debug('extra: writing finished.');
+            } catch (err: unknown) {
+              // error
+              logger.error(err);
             }
-            resolve();
-            logger.debug('extra: writing finished.');
-
-          } catch (err: unknown) {
-            // error
-            logger.error(err);
-          }
-        });
-      }));
+          });
+        }),
+      );
     }
     // csv file name
-    const csvFileName: string = (new Date).toISOString().replace(/[^\d]/g, '').slice(0, 14);
+    const csvFileName: string = new Date()
+      .toISOString()
+      .replace(/[^\d]/g, '')
+      .slice(0, 14);
     // desktop path
     const filePath: string = path.join(dir_desktop, csvFileName + '.csv');
     // write data
@@ -677,7 +741,95 @@ ipcMain.on('extra', async (_: any, arg: any): Promise<void> => {
     // complete
     logger.info('ipc: extra completed');
     dialogMaker.showmessage('info', 'extra completed.');
+  } catch (e: unknown) {
+    logger.error(e);
+    // error
+    if (e instanceof Error) {
+      // error message
+      dialogMaker.showmessage('error', e.message);
+    }
+  }
+});
 
+// split
+ipcMain.on('split', async (_: any, arg: any): Promise<void> => {
+  try {
+    logger.info('ipc: split mode');
+    // language
+    const language: any = cacheMaker.get('language') ?? 'japanese';
+    // file list
+    const sourceFiles: string[] = await readdir(
+      path.join(baseFilePath, 'source'),
+    );
+    // if empty
+    if (sourceFiles.length == 0) {
+      // japanese
+      if (language == 'japanese') {
+        throw new Error('対象のファイルが空です(file/source)。');
+      } else {
+        throw new Error('file/source directory is empty.');
+      }
+    }
+    logger.debug('split: txt exists');
+
+    for (const file of sourceFiles) {
+      logger.debug('split: ' + file);
+      // file path
+      const tmpFilePath: string = path.join(baseFilePath, 'source', file);
+      // not exists
+      if (existsSync(tmpFilePath)) {
+        // read files
+        const txtdata: any = await readFile(tmpFilePath);
+        // detect charcode
+        let detectedEncoding: string | boolean = Encoding.detect(txtdata);
+        logger.silly('extra: ' + detectedEncoding);
+        // without string
+        if (typeof detectedEncoding !== 'string') {
+          // japanese
+          if (language == 'japanese') {
+            logger.error('エンコーディングエラー');
+            detectedEncoding = myConst.CSV_ENCODING;
+          } else {
+            logger.error('error-encoding');
+            detectedEncoding = myConst.DEFAULT_ENCODING;
+          }
+        } else if (detectedEncoding == 'UNICODE') {
+          detectedEncoding = myConst.DEFAULT_ENCODING;
+        }
+        // decode
+        const str: string = iconv.decode(txtdata, detectedEncoding);
+        logger.silly('extra: char decoding finished.');
+        // split with 3 wraps
+        const tmpSplit: string[] = str.split('\n');
+        // header
+        const tmpHead: string =
+          tmpSplit[0] + tmpSplit[1] + tmpSplit[2] + tmpSplit[3];
+        // without header
+        const expHead: string = tmpSplit.slice(4).join('');
+        // split with '底本:'
+        const tmpFooter: string[] = expHead.split('底本：');
+        // split text
+        const splittedArray: string[] =
+          await modifyMaker.createTextChunks(expHead);
+        logger.silly('extra: finished');
+        // split with \n
+        const tmpSplitText: string =
+          tmpHead + splittedArray.join('\n') + '\n\n' + tmpFooter;
+        // out file path
+        const tmpOutputPath: string = path.join(baseFilePath, 'splitted', file);
+        // make txt file
+        await writeFile(tmpOutputPath, tmpSplitText);
+      }
+    }
+    // complete
+    logger.info('ipc: extra completed');
+    // delete all
+    for (const tmp of sourceFiles) {
+      // file path
+      const tmpDelPath: string = path.join(baseFilePath, 'source', tmp);
+      await unlink(tmpDelPath);
+    }
+    dialogMaker.showmessage('info', 'extra completed.');
   } catch (e: unknown) {
     logger.error(e);
     // error
@@ -715,7 +867,11 @@ ipcMain.on('save', async (event: any, arg: any): Promise<void> => {
     // language
     const language: string = String(arg.language);
     // txt path
-    const languageTxtPath: string = path.join(globalRootPath, "assets", "language.txt");
+    const languageTxtPath: string = path.join(
+      globalRootPath,
+      'assets',
+      'language.txt',
+    );
     // make txt file
     await writeFile(languageTxtPath, language);
     // cache
@@ -772,14 +928,17 @@ ipcMain.on('exit', async (): Promise<void> => {
       questionMessage = 'exit?';
     }
     // selection
-    const selected: number = dialogMaker.showQuetion('question', questionTitle, questionMessage);
+    const selected: number = dialogMaker.showQuetion(
+      'question',
+      questionTitle,
+      questionMessage,
+    );
 
     // when yes
     if (selected == 0) {
       // close
       app.quit();
     }
-
   } catch (e: unknown) {
     logger.error(e);
   }
@@ -793,4 +952,4 @@ const arrayChunk = <T>(array: T[], size: number): T[][] => {
     result.push(array.slice(i, i + size));
   }
   return result;
-}
+};

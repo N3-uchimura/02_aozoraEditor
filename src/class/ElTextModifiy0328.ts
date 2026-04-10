@@ -3,13 +3,14 @@
  *
  * ElTextModifiy
  * function：text modifier
- * updated: 2025/10/05
+ * updated: 2026/03/28
  **/
 
 'use strict';
 
 // define modules
 import { toDakuon } from 'kanadaku';
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { jionArray } from '../lib/dic-jion';
 import { kanaArray } from '../lib/dic-kana';
 import { kanjiArray } from '../lib/dic-kanji';
@@ -18,6 +19,14 @@ import { smallArray } from '../lib/dic-small';
 // global variables
 const ARRAY_LENGTH: number = 30;
 const LINE_LENGTH: number = 30;
+
+// DB設定
+export namespace myDBs {
+  // チャンク文字数
+  export const CHUNK_SIZE: number = 400;
+  // チャンク重複文字数
+  export const CHUNK_OVERWRAP: number = 0;
+}
 
 //* Interfaces
 interface removed {
@@ -102,7 +111,7 @@ export class Modifiy {
                 }
               } else if (mode > 1) {
                 // goto second
-                secondFlg = true
+                secondFlg = true;
               } else {
                 // error
                 Modifiy.logger.error('error');
@@ -113,7 +122,6 @@ export class Modifiy {
         }
         // complete
         resolve(tmpStr);
-
       } catch (e: unknown) {
         Modifiy.logger.error(e);
         // reject
@@ -128,7 +136,8 @@ export class Modifiy {
       try {
         Modifiy.logger.silly('modify: remove annotation');
         // annotation distinction
-        const annotation: string = '-------------------------------------------------------';
+        const annotation: string =
+          '-------------------------------------------------------';
 
         // remove
         if (str.includes(annotation)) {
@@ -147,7 +156,6 @@ export class Modifiy {
             body: str,
           });
         }
-
       } catch (e: unknown) {
         Modifiy.logger.error(e);
         // reject
@@ -172,7 +180,6 @@ export class Modifiy {
         } else {
           resolve(str);
         }
-
       } catch (e: unknown) {
         Modifiy.logger.error(e);
         // reject
@@ -188,7 +195,6 @@ export class Modifiy {
         Modifiy.logger.silly('modify: remove ruby(《》)');
         // result
         resolve(str.replace(/《.+?》/g, ''));
-
       } catch (e: unknown) {
         Modifiy.logger.error(e);
         // reject
@@ -204,7 +210,6 @@ export class Modifiy {
         Modifiy.logger.silly('modify: remove brackets');
         // result
         resolve(str.replace(/［＃.+?］.*?/g, ''));
-
       } catch (e: unknown) {
         Modifiy.logger.error(e);
         // reject
@@ -224,101 +229,100 @@ export class Modifiy {
         const shortSymbols: string[] = ['ゝ', 'ゞ', '／＼', '／″＼'];
 
         // promise
-        await Promise.all(shortSymbols.map(async (smb: string): Promise<void> => {
-          return new Promise(async (resolve2, reject2) => {
-            try {
-              // str length
-              let strLen: number = 0;
-              // matched
-              let matchedStr: string = '';
+        await Promise.all(
+          shortSymbols.map(async (smb: string): Promise<void> => {
+            return new Promise(async (resolve2, reject2) => {
+              try {
+                // str length
+                let strLen: number = 0;
+                // matched
+                let matchedStr: string = '';
 
-              // if include
-              if (tmpStr.includes(smb)) {
+                // if include
+                if (tmpStr.includes(smb)) {
+                  // when voiced
+                  if (smb == '／″＼') {
+                    // str length
+                    strLen = 2;
+                  } else {
+                    // str length
+                    strLen = smb.length;
+                  }
 
-                // when voiced
-                if (smb == '／″＼') {
-                  // str length
-                  strLen = 2;
+                  // str length is over 2
+                  if (strLen > 1) {
+                    matchedStr = '.{2}';
+                  } else {
+                    matchedStr = '.';
+                  }
 
-                } else {
-                  // str length
-                  strLen = smb.length;
+                  // regexp
+                  const regex: RegExp = new RegExp(matchedStr + smb, 'g');
+                  // match part
+                  const match = tmpStr.match(regex);
+
+                  // if match
+                  if (match) {
+                    // promise
+                    await Promise.all(
+                      match.map(async (mp: string): Promise<void> => {
+                        return new Promise(async (resolve3, reject3) => {
+                          try {
+                            // just before
+                            let previousChar = '';
+                            // matched char
+                            let hitChar = '';
+
+                            // voiced
+                            if (smb == '／″＼') {
+                              // just before
+                              previousChar = toDakuon(mp.substring(0, strLen));
+                              // matched char
+                              hitChar = mp.substring(strLen, strLen * 2 + 1);
+                            } else {
+                              // just before
+                              previousChar = mp.substring(0, strLen);
+                              // matched char
+                              hitChar = mp.substring(strLen, strLen * 2);
+                            }
+                            // replace
+                            const replaced: string = mp.replace(
+                              hitChar,
+                              previousChar,
+                            );
+                            // replaced string
+                            tmpStr = tmpStr.replace(mp, replaced);
+
+                            // result
+                            resolve3();
+                          } catch (err1: unknown) {
+                            if (err1 instanceof Error) {
+                              Modifiy.logger.error(err1.message);
+                              // error
+                              reject3();
+                            }
+                          }
+                        });
+                      }),
+                    );
+                  } else {
+                    Modifiy.logger.error('not found');
+                  }
                 }
-
-                // str length is over 2
-                if (strLen > 1) {
-                  matchedStr = '.{2}';
-
-                } else {
-                  matchedStr = '.';
-                }
-
-                // regexp
-                const regex: RegExp = new RegExp(matchedStr + smb, 'g');
-                // match part
-                const match = tmpStr.match(regex);
-
-                // if match
-                if (match) {
-                  // promise
-                  await Promise.all(match.map(async (mp: string): Promise<void> => {
-                    return new Promise(async (resolve3, reject3) => {
-                      try {
-                        // just before
-                        let previousChar = '';
-                        // matched char
-                        let hitChar = '';
-
-                        // voiced
-                        if (smb == '／″＼') {
-                          // just before
-                          previousChar = toDakuon(mp.substring(0, strLen));
-                          // matched char
-                          hitChar = mp.substring(strLen, strLen * 2 + 1);
-
-                        } else {
-                          // just before
-                          previousChar = mp.substring(0, strLen);
-                          // matched char
-                          hitChar = mp.substring(strLen, strLen * 2);
-                        }
-                        // replace
-                        const replaced: string = mp.replace(hitChar, previousChar);
-                        // replaced string
-                        tmpStr = tmpStr.replace(mp, replaced);
-
-                        // result
-                        resolve3();
-
-                      } catch (err1: unknown) {
-                        if (err1 instanceof Error) {
-                          Modifiy.logger.error(err1.message);
-                          // error
-                          reject3();
-                        }
-                      }
-                    });
-                  }));
-
-                } else {
-                  Modifiy.logger.error('not found');
+                // result
+                resolve2();
+              } catch (err2: unknown) {
+                if (err2 instanceof Error) {
+                  Modifiy.logger.error(err2.message);
+                  // error
+                  reject2();
                 }
               }
-              // result
-              resolve2();
-
-            } catch (err2: unknown) {
-              if (err2 instanceof Error) {
-                Modifiy.logger.error(err2.message);
-                // error
-                reject2();
-              }
-            }
-          });
-        }));
+            });
+          }),
+        );
         // result
         resolve1(tmpStr);
-
       } catch (e: unknown) {
         Modifiy.logger.error(e);
         // reject
@@ -337,28 +341,28 @@ export class Modifiy {
         // symbols
         const symbols: string[] = ['｜', '――'];
         // removal
-        await Promise.all(symbols.map((syb: string): Promise<void> => {
-          return new Promise(async (resolve2, reject2) => {
-            try {
-              // regexp
-              const regStr: RegExp = new RegExp(syb, 'g');
-              // replaced
-              tmpStr = tmpStr.replace(regStr, '');
-              // result
-              resolve2();
-
-            } catch (err: unknown) {
-              if (err instanceof Error) {
-                Modifiy.logger.error(err.message);
-                // error
-                reject2();
+        await Promise.all(
+          symbols.map((syb: string): Promise<void> => {
+            return new Promise(async (resolve2, reject2) => {
+              try {
+                // regexp
+                const regStr: RegExp = new RegExp(syb, 'g');
+                // replaced
+                tmpStr = tmpStr.replace(regStr, '');
+                // result
+                resolve2();
+              } catch (err: unknown) {
+                if (err instanceof Error) {
+                  Modifiy.logger.error(err.message);
+                  // error
+                  reject2();
+                }
               }
-            }
-          })
-        }));
+            });
+          }),
+        );
         // result
         resolve1(tmpStr);
-
       } catch (e: unknown) {
         Modifiy.logger.error(e);
         // reject
@@ -384,22 +388,22 @@ export class Modifiy {
         // switch on mode
         switch (mode) {
           case 1:
-            Modifiy.logger.silly("replaceOldToNew: kanji mode.");
+            Modifiy.logger.silly('replaceOldToNew: kanji mode.');
             comparisonArray = kanjiArray;
             reverseFlg = false;
             break;
           case 2:
-            Modifiy.logger.silly("replaceOldToNew: kana mode.");
+            Modifiy.logger.silly('replaceOldToNew: kana mode.');
             comparisonArray = kanaArray;
             reverseFlg = false;
             break;
           case 3:
-            Modifiy.logger.silly("replaceOldToNew: small mode.");
+            Modifiy.logger.silly('replaceOldToNew: small mode.');
             comparisonArray = smallArray;
             reverseFlg = true;
             break;
           case 4:
-            Modifiy.logger.silly("replaceOldToNew: jion mode.");
+            Modifiy.logger.silly('replaceOldToNew: jion mode.');
             comparisonArray = jionArray;
             reverseFlg = true;
             break;
@@ -414,21 +418,30 @@ export class Modifiy {
             if (reverseFlg) {
               // remove footer
               if (tmpStr.includes(comparisonArray[i][0])) {
-                tmpStr = tmpStr.replaceAll(comparisonArray[i][0], comparisonArray[i][1]);
-                Modifiy.logger.silly(`replaced ${comparisonArray[i][0]} to ${comparisonArray[i][1]}`);
+                tmpStr = tmpStr.replaceAll(
+                  comparisonArray[i][0],
+                  comparisonArray[i][1],
+                );
+                Modifiy.logger.silly(
+                  `replaced ${comparisonArray[i][0]} to ${comparisonArray[i][1]}`,
+                );
               }
             } else {
               // remove footer
               if (tmpStr.includes(comparisonArray[i][1])) {
-                tmpStr = tmpStr.replaceAll(comparisonArray[i][1], comparisonArray[i][0]);
-                Modifiy.logger.silly(`replaced ${comparisonArray[i][1]} to ${comparisonArray[i][0]}`);
+                tmpStr = tmpStr.replaceAll(
+                  comparisonArray[i][1],
+                  comparisonArray[i][0],
+                );
+                Modifiy.logger.silly(
+                  `replaced ${comparisonArray[i][1]} to ${comparisonArray[i][0]}`,
+                );
               }
             }
           }
         }
         // finished
         resolve(tmpStr);
-
       } catch (e: unknown) {
         Modifiy.logger.error(e);
         // reject
@@ -436,4 +449,33 @@ export class Modifiy {
       }
     });
   }
+
+  // チャンク作成
+  createTextChunks = async (text: string): Promise<string[]> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // テキスト整形
+        const cleanedText: string = text
+          .replace(/<[^>]*>/g, '')
+          .replace(/\r?\n/g, ' ')
+          .replace(/　/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        // チャンク分割設定
+        const textSplitter = new RecursiveCharacterTextSplitter({
+          chunkSize: myDBs.CHUNK_SIZE, // 文字数
+          chunkOverlap: myDBs.CHUNK_OVERWRAP, // 先頭と末尾の重複文字数
+        });
+        // チャンク分割
+        const chunks: string[] = await textSplitter.splitText(cleanedText);
+        // チャンク戻し
+        resolve(chunks);
+      } catch (e) {
+        // エラー
+        Modifiy.logger.error(e);
+        // リジェクト
+        reject([]);
+      }
+    });
+  };
 }

@@ -12,9 +12,8 @@
 <body>
   <h1 id="maintitle">Aozora Editor</h1>
   <div class="operation_area">
-      <button id="open_button" class="button-g button-6 button-wide" value="open"
-        onclick="gotoOpen()">Open</button>
-    </div>
+    <button id="open_button" class="button-g button-6 button-wide" value="open" onclick="gotoOpen()">Open</button>
+  </div>
   <div class="operation_area">
     <h3 id="extract">Extract</h3>
     <button id="extract_button" class="button-g button-wide" value="extract" onclick="gotoExtract()">Extract</button>
@@ -26,6 +25,10 @@
   <div class="operation_area">
     <h3 id="rename">Rename</h3>
     <button id="rename_button" class="button-g button-wide" value="rename" onclick="gotoRename()">Rename</button>
+  </div>
+  <div class="operation_area">
+    <h3 id="split">Split</h3>
+    <button id="split_button" class="button-g button-wide" value="split" onclick="gotoSplit()">Split</button>
   </div>
   <div class="extra_area">
     <h3 id="extra">Extra</h3>
@@ -59,6 +62,7 @@
     const EXTRACT_STR_JA = 'ZIP解凍';
     const MODIFY_STR_JA = 'TXT修正';
     const RENAME_STR_JA = 'リネーム';
+    const SPLIT_STR_JA = '分割';
     const FIRST_STR_JA = '1行目';
     const FIRSTPLIS_STR_JA = '1行目*';
     const SECOND_STR_JA = '2行目';
@@ -72,6 +76,7 @@
     const EXTRACT_STR_EN = 'Extract';
     const MODIFY_STR_EN = 'Modify';
     const RENAME_STR_EN = 'Rename';
+    const SPLIT_STR_EN = 'Split';
     const FIRST_STR_EN = '1st line';
     const FIRSTPLIS_STR_EN = '1 line*';
     const SECOND_STR_EN = '2nd line';
@@ -87,6 +92,8 @@
     const modifyButtonDom = document.getElementById('modify_button');
     const renameDom = document.getElementById('rename');
     const renameButtonDom = document.getElementById('rename_button');
+    const splitDom = document.getElementById('split');
+    const splitButtonDom = document.getElementById('split_button');
     const firstLabelDom = document.getElementById('firstlabel');
     const firstPlusLabelDom = document.getElementById('firstpluslabel');
     const firstDom = document.getElementById('first');
@@ -144,6 +151,19 @@
         console.log('renaming');
         // rename
         window.api.send('rename');
+
+      } catch (e) {
+        // error
+        console.log(e);
+      }
+    }
+
+    // start splitting
+    const gotoSplit = () => {
+      try {
+        console.log('splitting');
+        // split
+        window.api.send('split');
 
       } catch (e) {
         // error
@@ -216,6 +236,8 @@
         modifyButtonDom.innerHTML = MODIFY_STR_JA;
         renameDom.innerHTML = RENAME_STR_JA;
         renameButtonDom.innerHTML = RENAME_STR_JA;
+        splitDom.innerHTML = SPLIT_STR_JA;
+        splitButtonDom.innerHTML = SPLIT_STR_JA;
         firstLabelDom.innerHTML = FIRST_STR_JA;
         firstPlusLabelDom.innerHTML = FIRSTPLIS_STR_JA;
         secondLabelDom.innerHTML = SECOND_STR_JA;
@@ -237,6 +259,8 @@
         modifyButtonDom.innerHTML = MODIFY_STR_EN;
         renameDom.innerHTML = RENAME_STR_EN;
         renameButtonDom.innerHTML = RENAME_STR_EN;
+        splitDom.innerHTML = SPLIT_STR_EN;
+        splitButtonDom.innerHTML = SPLIT_STR_EN;
         firstLabelDom.innerHTML = FIRST_STR_EN;
         firstPlusLabelDom.innerHTML = FIRSTPLIS_STR_EN;
         secondLabelDom.innerHTML = SECOND_STR_EN;
