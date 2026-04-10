@@ -19,7 +19,6 @@ import {
   writeFile,
   rename,
   readdir,
-  unlink,
 } from 'node:fs/promises'; // promise fs
 import { setTimeout } from 'node:timers/promises'; // wait for seconds
 import { exec } from 'child_process'; // child process

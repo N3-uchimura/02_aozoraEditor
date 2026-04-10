@@ -1,7 +1,7 @@
 {
   "name": "aozora-editor",
   "productName": "aozoraeditor",
-  "version": "1.4.0-alpha",
+  "version": "1.4.0-alpha.1",
   "description": "application for editing aozora bunko txts",
   "main": "build/aozoraeditor.js",
   "scripts": {
