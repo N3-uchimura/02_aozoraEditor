@@ -10,7 +10,6 @@
 
 // define modules
 import { toDakuon } from 'kanadaku';
-import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { jionArray } from '../lib/dic-jion';
 import { kanaArray } from '../lib/dic-kana';
 import { kanjiArray } from '../lib/dic-kanji';
@@ -449,33 +448,4 @@ export class Modifiy {
       }
     });
   }
-
-  // チャンク作成
-  createTextChunks = async (text: string): Promise<string[]> => {
-    return new Promise(async (resolve, reject) => {
-      try {
-        // テキスト整形
-        const cleanedText: string = text
-          .replace(/<[^>]*>/g, '')
-          .replace(/\r?\n/g, ' ')
-          .replace(/　/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-        // チャンク分割設定
-        const textSplitter = new RecursiveCharacterTextSplitter({
-          chunkSize: myDBs.CHUNK_SIZE, // 文字数
-          chunkOverlap: myDBs.CHUNK_OVERWRAP, // 先頭と末尾の重複文字数
-        });
-        // チャンク分割
-        const chunks: string[] = await textSplitter.splitText(cleanedText);
-        // チャンク戻し
-        resolve(chunks);
-      } catch (e) {
-        // エラー
-        Modifiy.logger.error(e);
-        // リジェクト
-        reject([]);
-      }
-    });
-  };
 }

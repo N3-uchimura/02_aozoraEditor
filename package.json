@@ -20,7 +20,6 @@
     "email": "uchimura@numthree.net"
   },
   "dependencies": {
-    "@langchain/textsplitters": "^1.0.1",
     "csv": "^6.4.1",
     "electron-log": "^5.4.0",
     "encoding-japanese": "^2.2.0",
